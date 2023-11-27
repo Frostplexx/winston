@@ -45,6 +45,9 @@
         }
       }
     },
+    " Local Favorites" : {
+
+    },
     " testers! (but it needs help)" : {
       "localizations" : {
         "de" : {
@@ -437,6 +440,9 @@
         }
       }
     },
+    "Actually **not**, even though Reddit doesn't like it, accordingly to the TOS, the API limits are only applicable when there are profit involved. Winston is open source and free, and it works just like any bot in the internet: by allowing you to use your own API key the way you like it, the way it was supposed to be." : {
+
+    },
     "Advanced" : {
       "localizations" : {
         "de" : {
@@ -773,6 +779,12 @@
         }
       }
     },
+    "Clear " : {
+
+    },
+    "Clear Cache (" : {
+
+    },
     "Collapse AutoModerator comments" : {
       "localizations" : {
         "de" : {
@@ -804,6 +816,9 @@
           }
         }
       }
+    },
+    "Comment Karma" : {
+
     },
     "Comments" : {
       "localizations" : {
@@ -2019,6 +2034,9 @@
         }
       }
     },
+    "Is Winston against Reddit's TOS?" : {
+
+    },
     "It worked!" : {
       "localizations" : {
         "de" : {
@@ -2165,6 +2183,12 @@
         }
       }
     },
+    "Latest " : {
+
+    },
+    "Latest activity" : {
+
+    },
     "Left" : {
       "localizations" : {
         "de" : {
@@ -2212,6 +2236,9 @@
           }
         }
       }
+    },
+    "Loading..." : {
+
     },
     "Lock Winston With %@" : {
       "localizations" : {
@@ -2485,6 +2512,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mutlis"
+          }
+        }
+      }
+    },
+    "My Themes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Themes"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miei Temi"
           }
         }
       }
@@ -2857,6 +2900,9 @@
         }
       }
     },
+    "Post Karma" : {
+
+    },
     "Post Link Body Size" : {
       "localizations" : {
         "de" : {
@@ -3161,6 +3207,9 @@
         }
       }
     },
+    "Save posts in the Posts Box to be read later. These will live in Winston and wont be synced to Reddit." : {
+
+    },
     "Save sort per subreddit" : {
       "localizations" : {
         "de" : {
@@ -3173,6 +3222,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salva l'ordinamento per ogni subreddit"
+          }
+        }
+      }
+    },
+    "Saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeichert"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvati"
           }
         }
       }
@@ -3817,6 +3882,22 @@
         }
       }
     },
+    "Theme Store" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme Geschäft"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Negozio Temi"
+          }
+        }
+      }
+    },
     "Theme Store Tint" : {
       "localizations" : {
         "de" : {
@@ -3864,6 +3945,9 @@
           }
         }
       }
+    },
+    "Then we'll release another version which uses our own single API key (it won't require any of you to enter your own anymore) and allow you to recharge your account and use it however you like. That's what Reddit wants at the end, but our bet is that Reddit won't find a way to take Winston down because the previously mentioned similarity with a bot in the technical manners." : {
+
     },
     "Then, come back here!" : {
       "localizations" : {
@@ -4137,6 +4221,9 @@
         }
       }
     },
+    "User since" : {
+
+    },
     "View full conversation" : {
       "localizations" : {
         "de" : {
@@ -4217,6 +4304,18 @@
         }
       }
     },
+    "We're lo.cafe, a group of friends (Igor (me), Ernesto, Laís, Oeste (teenager cat) and Bidu(old cat)) that produces amazing software together. We made lo-rain, an app that makes it rain over your desktop on MacOS, we're making a game and many other crazy stuff. [Check our website!](https://lo.cafe)" : {
+
+    },
+    "What does the Box Icon do?" : {
+
+    },
+    "What if Reddit takes Winston down?" : {
+
+    },
+    "What's Winston Everywhere?" : {
+
+    },
     "Whats New" : {
       "localizations" : {
         "de" : {
@@ -4249,6 +4348,12 @@
         }
       }
     },
+    "Who are you?" : {
+
+    },
+    "Will Winston ever be released in the App Store at some point?" : {
+
+    },
     "Winston" : {
       "localizations" : {
         "de" : {
@@ -4264,6 +4369,9 @@
           }
         }
       }
+    },
+    "Winston Everywhere is a Safari extension, that autmatically redirects Reddit links to Winston." : {
+
     },
     "Winston hit " : {
       "localizations" : {
@@ -4360,6 +4468,9 @@
           }
         }
       }
+    },
+    "Yes. Winston is planned to be released in the App Store soon, still allowing users to use their own API key." : {
+
     },
     "You don't have any local themes" : {
       "localizations" : {

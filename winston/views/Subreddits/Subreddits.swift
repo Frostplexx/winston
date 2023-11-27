@@ -54,14 +54,14 @@ struct Subreddits: View, Equatable {
           VStack(spacing: 12) {
             HStack(spacing: 12) {
               //have 'selectedSub:icon:iconColor:label:destination:', expected 'selectedSub:value:destination:iconColor:label:icon:shiny
-              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "home", api: RedditAPI.shared), icon: "house.circle.fill", iconColor: .blue, label: "Home")
+              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "home", api: RedditAPI.shared), icon: "house.circle.fill", iconColor: .blue, label: String(localized: "Home"))
 
-              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "popular", api: RedditAPI.shared), icon: "chart.line.uptrend.xyaxis.circle.fill", iconColor: .red, label: "Popular")
+              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "popular", api: RedditAPI.shared), icon: "chart.line.uptrend.xyaxis.circle.fill", iconColor: .red, label: String(localized: "Popular"))
             }
             HStack(spacing: 12) {
-              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "all", api: RedditAPI.shared), icon: "signpost.right.and.left.circle.fill", iconColor: .orange, label: "All")
+              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "all", api: RedditAPI.shared), icon: "signpost.right.and.left.circle.fill", iconColor: .orange, label: String(localized: "All"))
               
-              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "saved", api: RedditAPI.shared), icon: "bookmark.circle.fill", iconColor: .green, label: "Saved")
+              ListBigBtn(selectedSub: $selectedSub, destination: Subreddit(id: "saved", api: RedditAPI.shared), icon: "bookmark.circle.fill", iconColor: .green, label: String(localized: "Saved"))
             }
           }
           .frame(maxWidth: .infinity)

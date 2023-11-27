@@ -87,8 +87,8 @@ struct AppearancePanel: View {
       
       Section {
         HStack(spacing: 12){
-          ListBigBtn(value: SettingsPages.themes,icon: "paintbrush.fill", iconColor: Color.blue, label: "My Themes")
-          ListBigBtn(value: SettingsPages.themeStore, icon: "basket.fill", iconColor: Color.orange, label: "Theme Store")
+          ListBigBtn(value: SettingsPages.themes,icon: "paintbrush.fill", iconColor: Color.blue, label: String(localized: "My Themes"))
+          ListBigBtn(value: SettingsPages.themeStore, icon: "basket.fill", iconColor: Color.orange, label: String(localized: "Theme Store"))
         }
       } footer: {
         if theme.id == "default" {

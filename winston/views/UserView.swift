@@ -113,7 +113,7 @@ struct UserView: View {
             VStack {
               HStack {
                 if let postKarma = data.link_karma {
-                  DataBlock(icon: "highlighter", label: "Post karma",
+                  DataBlock(icon: "highlighter", label: String(localized: "Post Karma"),
                             value: "\(formatBigNumber(postKarma))") // maybe switch this to use the theme colors?
                   .transition(.opacity)
                   .onTapGesture {
@@ -133,7 +133,7 @@ struct UserView: View {
                 }
                 
                 if let commentKarma = data.comment_karma {
-                  DataBlock(icon: "checkmark.message.fill", label: "Comment karma", value: "\(formatBigNumber(commentKarma))")
+                  DataBlock(icon: "checkmark.message.fill", label: String(localized: "Comment Karma"), value: "\(formatBigNumber(commentKarma))")
                     .transition(.opacity)
                     .onTapGesture {
                       withAnimation(.easeInOut(duration: 0.2)) {
@@ -152,7 +152,7 @@ struct UserView: View {
                 }
               }
               if let created = data.created {
-                DataBlock(icon: "star.fill", label: "User since", value: "\(Date(timeIntervalSince1970: TimeInterval(created)).toFormat("MMM dd, yyyy"))")
+                DataBlock(icon: "star.fill", label: String(localized: "User since"), value: "\(Date(timeIntervalSince1970: TimeInterval(created)).toFormat("MMM dd, yyyy"))")
                   .transition(.opacity)
               }
             }
@@ -161,7 +161,7 @@ struct UserView: View {
             .transition(.opacity)
           }
           
-          Text(dataTypeFilter.isEmpty ? "Latest activity" : "Latest " + dataTypeFilter)
+          Text(dataTypeFilter.isEmpty ? String(localized: "Latest activity") : String(localized: "Latest ") + dataTypeFilter)
             .fontSize(20, .bold)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
@@ -204,7 +204,7 @@ struct UserView: View {
     .refreshable {
       await refresh()
     }
-    .navigationTitle(user.data?.name ?? "Loading...")
+    .navigationTitle(user.data?.name ?? String(localized: "Loading..."))
     .navigationBarTitleDisplayMode(.inline)
     .onAppear {
       Task(priority: .background) {

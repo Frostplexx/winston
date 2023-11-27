@@ -71,7 +71,7 @@ struct GeneralPanel: View {
           resetCaches()
           resetCoreData()
         } label: {
-          Label("Clear Cache (" + totalCacheSize + ")", systemImage: "trash")
+          Label(String(localized: "Clear Cache (") + totalCacheSize + ")", systemImage: "trash")
             .foregroundColor(.red)
         }
         .onAppear{
@@ -81,7 +81,7 @@ struct GeneralPanel: View {
         WListButton {
           likedButNotSubbed = []
         } label: {
-          Label("Clear " + String(likedButNotSubbed.count) + " Local Favorites", systemImage: "heart.slash.fill")
+          Label(String(localized: "Clear ") + String(likedButNotSubbed.count) + String(localized: " Local Favorites"), systemImage: "heart.slash.fill")
             .foregroundColor(.red)
         }
         

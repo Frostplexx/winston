@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CommentsSectionTheme: Codable, Hashable, Equatable {
+struct CommentsSectionTheme: Codable, Hashable {
   enum CodingKeys: String, CodingKey {
     case theme, spacing, divider
   }
@@ -38,9 +38,9 @@ struct CommentsSectionTheme: Codable, Hashable, Equatable {
   }
 }
 
-struct CommentTheme: Codable, Hashable, Equatable {
+struct CommentTheme: Codable, Hashable {
   enum CodingKeys: String, CodingKey {
-    case innerPadding, outerHPadding, repliesSpacing, indentCurve, indentColor, cornerRadius, badge, bodyText, bodyAuthorSpacing, linespacing, bg, loadMoreInnerPadding, loadMoreText, loadMoreBackground, unseenDot
+    case innerPadding, outerHPadding, repliesSpacing, indentCurve, indentColor, cornerRadius, badge, bodyText, bodyAuthorSpacing, linespacing, bg, loadMoreInnerPadding, loadMoreOuterTopPadding, loadMoreText, loadMoreBackground, unseenDot
   }
   
   var innerPadding: ThemePadding
@@ -56,12 +56,13 @@ struct CommentTheme: Codable, Hashable, Equatable {
   var bg: ColorSchemes<ThemeColor>
     
   var loadMoreInnerPadding: ThemePadding
+  var loadMoreOuterTopPadding: CGFloat
   var loadMoreText : ThemeText
   var loadMoreBackground : ColorSchemes<ThemeColor>
   
   var unseenDot : ColorSchemes<ThemeColor>
   
-  init(innerPadding: ThemePadding, outerHPadding: CGFloat, repliesSpacing: CGFloat, indentCurve: CGFloat, indentColor: ColorSchemes<ThemeColor>, cornerRadius: CGFloat, badge: BadgeTheme, bodyText: ThemeText, bodyAuthorSpacing: CGFloat, linespacing: CGFloat, bg: ColorSchemes<ThemeColor>, loadMoreInnerPadding: ThemePadding, loadMoreText : ThemeText, loadMoreBackground : ColorSchemes<ThemeColor>, unseenDot : ColorSchemes<ThemeColor>) {
+  init(innerPadding: ThemePadding, outerHPadding: CGFloat, repliesSpacing: CGFloat, indentCurve: CGFloat, indentColor: ColorSchemes<ThemeColor>, cornerRadius: CGFloat, badge: BadgeTheme, bodyText: ThemeText, bodyAuthorSpacing: CGFloat, linespacing: CGFloat, bg: ColorSchemes<ThemeColor>, loadMoreInnerPadding: ThemePadding, loadMoreOuterTopPadding: CGFloat, loadMoreText : ThemeText, loadMoreBackground : ColorSchemes<ThemeColor>, unseenDot : ColorSchemes<ThemeColor>) {
     self.innerPadding = innerPadding
     self.outerHPadding = outerHPadding
     self.repliesSpacing = repliesSpacing
@@ -74,6 +75,7 @@ struct CommentTheme: Codable, Hashable, Equatable {
     self.linespacing = linespacing
     self.bg = bg
     self.loadMoreInnerPadding = loadMoreInnerPadding
+    self.loadMoreOuterTopPadding = loadMoreOuterTopPadding
     self.loadMoreText = loadMoreText
     self.loadMoreBackground = loadMoreBackground
     self.unseenDot = unseenDot
@@ -94,6 +96,7 @@ struct CommentTheme: Codable, Hashable, Equatable {
     try container.encodeIfPresent(linespacing, forKey: .linespacing)
     try container.encodeIfPresent(bg, forKey: .bg)
     try container.encodeIfPresent(loadMoreInnerPadding, forKey: .loadMoreInnerPadding)
+    try container.encodeIfPresent(loadMoreOuterTopPadding, forKey: .loadMoreOuterTopPadding)
     try container.encodeIfPresent(loadMoreText, forKey: .loadMoreText)
     try container.encodeIfPresent(loadMoreBackground, forKey: .loadMoreBackground)
     try container.encodeIfPresent(unseenDot, forKey: .unseenDot)
@@ -114,6 +117,7 @@ struct CommentTheme: Codable, Hashable, Equatable {
     self.linespacing = try container.decodeIfPresent(CGFloat.self, forKey: .linespacing) ?? t.linespacing
     self.bg = try container.decodeIfPresent(ColorSchemes<ThemeColor>.self, forKey: .bg) ?? t.bg
     self.loadMoreInnerPadding = try container.decodeIfPresent(ThemePadding.self, forKey: .loadMoreInnerPadding) ?? t.loadMoreInnerPadding
+    self.loadMoreOuterTopPadding = try container.decodeIfPresent(CGFloat.self, forKey: .loadMoreOuterTopPadding) ?? t.loadMoreOuterTopPadding
     self.loadMoreText = try container.decodeIfPresent(ThemeText.self, forKey: .loadMoreText) ?? t.loadMoreText
     self.loadMoreText = try container.decodeIfPresent(ThemeText.self, forKey: .loadMoreText) ?? t.loadMoreText
     self.loadMoreBackground = try container.decodeIfPresent(ColorSchemes<ThemeColor>.self, forKey: .loadMoreBackground) ?? t.loadMoreBackground

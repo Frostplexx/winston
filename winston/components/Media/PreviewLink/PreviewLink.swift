@@ -12,9 +12,9 @@ import YouTubePlayerKit
 struct PreviewLink: View {
   var url: URL
   var compact = false
-  @StateObject var previewModel: PreviewModel
+  @ObservedObject private var cache = Caches.postsPreviewModels
   
   var body: some View {
-    PreviewLinkContent(compact: compact, viewModel: previewModel, url: url)
+    PreviewLinkContent(compact: compact, viewModel: cache.cache[url.absoluteString]?.data ?? PreviewModel(url), url: url)
   }
 }

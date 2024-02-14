@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LightBoxButton: View {
-  @State private var pressed = false
+  @GestureState var pressed = false
   var icon: String
   var action: (()->())?
   var disabled = false
@@ -19,13 +19,16 @@ struct LightBoxButton: View {
       .background(Circle().fill(.secondary.opacity(pressed ? 0.15 : 0)))
       .contentShape(Circle())
       .scaleEffect(pressed ? 0.95 : 1)
-      .onTapGesture {
-        if !disabled {
-          withAnimation(.interpolatingSpring(stiffness: 250, damping: 15)) { pressed = true }
-          action?()
-          pressed.toggle()
-        }
-      }
+      .onTapGesture { if !disabled { action?() }}
+      .simultaneousGesture(
+        disabled
+        ? nil
+        : LongPressGesture(minimumDuration: 1)
+          .updating($pressed, body: { newPressed, state, transaction in
+            transaction.animation = .interpolatingSpring(stiffness: 250, damping: 15)
+            state = newPressed
+          })
+      )
       .transition(.scaleAndBlur)
       .id(icon)
   }

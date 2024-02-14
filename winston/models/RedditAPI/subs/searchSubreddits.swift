@@ -10,12 +10,28 @@ import Alamofire
 
 extension RedditAPI {
   func searchSubreddits(_ query: String) async -> [SubredditData]? {
-    let params = SearchSubredditPayload(q: query)
-    switch await self.doRequest("\(RedditAPI.redditApiURLBase)/subreddits/search", method: .get, params: params, paramsLocation: .queryString, decodable: Listing<SubredditData>.self)  {
-    case .success(let data):
-      return data.data?.children?.compactMap { $0.data }
-    case .failure(let error):
-      print(error)
+    await refreshToken()
+    //    await getModHash()
+    if let headers = self.getRequestHeaders() {
+      let params = SearchSubredditPayload(q: query)
+      let response = await AF.request(
+        "\(RedditAPI.redditApiURLBase)/subreddits/search",
+        method: .get,
+        parameters: params,
+        encoder: URLEncodedFormParameterEncoder(destination: .queryString),
+        headers: headers
+      )
+
+        .serializingDecodable(Listing<SubredditData>.self).result
+      switch response {
+      case .success(let data):
+        return data.data?.children?.compactMap { $0.data }
+      case .failure(let error):
+        Oops.shared.sendError(error)
+        print(error)
+        return nil
+      }
+    } else {
       return nil
     }
   }

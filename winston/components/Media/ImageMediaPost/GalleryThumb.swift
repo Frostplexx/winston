@@ -11,26 +11,25 @@ import Nuke
 
 struct GalleryThumb: View, Equatable {
   static func == (lhs: GalleryThumb, rhs: GalleryThumb) -> Bool {
-    lhs.url == rhs.url && lhs.width == rhs.width && lhs.height == rhs.height && lhs.cornerRadius == rhs.cornerRadius
+    lhs.width == rhs.width && lhs.url == rhs.url
   }
   
-  var cornerRadius: Double
   var width: CGFloat
   var height: CGFloat?
   var url: URL
   var imgRequest: ImageRequest? = nil
   
-//  @Environment(\.useTheme) private var selectedTheme
+  @Environment(\.useTheme) private var selectedTheme
   
   var body: some View {
-    URLImage(url: url, imgRequest: imgRequest, processors: [.resize(width: width)], size: CGSize(width: width, height: height ?? 0))
+    URLImage(url: url, imgRequest: imgRequest, processors: [.resize(width: width)])
       .scaledToFill()
       .zIndex(1)
-      .fixedSize(horizontal: false, vertical: height == nil)
       .allowsHitTesting(false)
+      .fixedSize(horizontal: false, vertical: height == nil)
       .frame(width: width, height: height)
       .clipped()
-      .mask(RR(cornerRadius, Color.black).equatable())
+      .mask(RR(selectedTheme.postLinks.theme.mediaCornerRadius, Color.black))
       .contentShape(Rectangle())
   }
 }

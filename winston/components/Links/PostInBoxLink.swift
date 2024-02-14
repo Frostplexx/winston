@@ -10,7 +10,8 @@ import NukeUI
 import Defaults
 
 struct PostInBoxLink: View {
-  @Binding var initialSelected: Router.NavDest?
+  @EnvironmentObject private var routerProxy: RouterProxy
+  @Binding var selectedSub: FirstSelectable?
   @Default(.postsInBox) private var postsInBox
   
   var postInBox: PostInBox
@@ -25,10 +26,7 @@ struct PostInBoxLink: View {
     //    } label: {
     VStack(alignment: .leading, spacing: 4) {
       HStack {
-        if let subredditIconKit = sub.data?.subredditIconKit {
-          SubredditIcon(subredditIconKit: subredditIconKit, size: 20)
-        }
-//        SubredditBaseIcon(name: postInBox.subredditName, iconURLStr: postInBox.subredditIconURL, id: postInBox.id, size: 20, color: postInBox.subColor)
+        SubredditBaseIcon(name: postInBox.subredditName, iconURLStr: postInBox.subredditIconURL, id: postInBox.id, size: 20, color: postInBox.subColor)
 //          .equatable()
         Text(postInBox.subredditName)
           .fontSize(13,.medium)
@@ -50,12 +48,6 @@ struct PostInBoxLink: View {
             Image(systemName: "message.fill")
             Text(formatBigNumber(postInBox.commentsCount ?? 0))
               .contentTransition(.numericText())
-            
-            if let newComments = postInBox.newCommentsCount {
-              if newComments > 0 {
-                Text("(\(Int(newComments)))").foregroundColor(.accentColor)
-              }
-            }
           }
           
           if let createdAt = postInBox.createdAt {
@@ -74,10 +66,10 @@ struct PostInBoxLink: View {
         HStack(alignment: .center, spacing: 4) {
           
           Image(systemName: "arrow.up")
-            .foregroundColor(.gray)
+            .foregroundColor(.orange)
           
           Text(formatBigNumber(postInBox.score ?? 0))
-            .foregroundColor(.gray)
+            .foregroundColor((postInBox.score ?? 0) > 0 ? .orange : postInBox.score == 0 ? .gray : .blue)
             .fontSize(13, .semibold)
             .transition(.asymmetric(insertion: .offset(y: 16), removal: .offset(y: -16)).combined(with: .opacity))
 //            .id(post.score)
@@ -94,18 +86,18 @@ struct PostInBoxLink: View {
     }
     .padding(.horizontal, 13)
     .padding(.vertical, 11)
-    .frame(width: (.screenW / 1.75), height: 120, alignment: .topLeading)
+    .frame(width: (UIScreen.screenWidth / 1.75), height: 120, alignment: .topLeading)
     .background(
       postInBox.img != nil && postInBox.img != ""
       
       ? URLImage(url: URL(string: postInBox.img!)!)
         .scaledToFill()
         .opacity(0.15)
-        .frame(width: (.screenW / 1.75), height: 120)
+        .frame(width: (UIScreen.screenWidth / 1.75), height: 120)
         .clipped()
       : nil
     )
-    .themedListRowLikeBG()
+    .themedListRowBG()
     .mask(RR(20, Color.listBG))
     .offset(y: offsetY ?? 0)
     .scaleEffect(dragging ? 0.975 : 1)
@@ -118,7 +110,7 @@ struct PostInBoxLink: View {
         .scaleEffect(deleting ? 1 : 0.85)
     )
     .onTapGesture {
-      initialSelected = .reddit(.post(post))
+      selectedSub = .post(PostViewPayload(post: post, postSelfAttr: nil, sub: sub))
     }
     .gesture(
       LongPressGesture(minimumDuration: 0.5, maximumDistance: 10)

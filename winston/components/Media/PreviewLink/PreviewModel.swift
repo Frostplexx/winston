@@ -11,10 +11,7 @@ import OpenGraph
 import NukeUI
 import Defaults
 
-final class PreviewModel: ObservableObject, Equatable {
-  static func == (lhs: PreviewModel, rhs: PreviewModel) -> Bool {
-    lhs.url == rhs.url
-  }
+final class PreviewModel: ObservableObject {
   
   @Published var image: String?
   @Published var title: String?
@@ -22,36 +19,28 @@ final class PreviewModel: ObservableObject, Equatable {
   @Published var description: String?
   @Published var loading = true
   
-  var previewURL: URL?
-  
-  init() {}
-  
-  init(_ url: URL, compact: Bool) {
-    self.previewURL = url
-    fetchMetadata(compact: compact)
-  }
-  
-  static func get(_ url: URL, compact: Bool) -> PreviewModel {
-    if let previewModel = Caches.postsPreviewModels.get(key: url.absoluteString) {
-      return previewModel
-    } else {
-      let previewModel = PreviewModel(url, compact: compact)
-      Caches.postsPreviewModels.addKeyValue(key: url.absoluteString, data: { previewModel })
-      
-      return previewModel
+  var previewURL: URL? {
+    didSet {
+      if previewURL != nil { fetchMetadata() }
     }
   }
   
-  private func fetchMetadata(compact: Bool) {
+  init() {}
+  
+  init(_ url: URL) {
+    self.previewURL = url
+    fetchMetadata()
+  }
+  
+  private func fetchMetadata() {
     guard let previewURL else { return }
-    
     Task(priority: .background) {
       var headers = [String: String]()
       headers["User-Agent"] = "facebookexternalhit/1.1"
       headers["charset"] = "UTF-8"
       if let og = try? await OpenGraph.fetch(url: previewURL, headers: headers) {
         if let imgURL = URL(string: og[.image] ?? "") {
-          Post.prefetcher.startPrefetching(with: [ImageRequest(url: imgURL, processors: [.resize(width:  compact ? scaledCompactModeThumbSize() : 76)], priority: .veryLow)])
+          Post.prefetcher.startPrefetching(with: [ImageRequest(url: imgURL, processors: [.resize(width:  Defaults[.compactMode] ? scaledCompactModeThumbSize() : 76)], priority: .veryLow)])
         }
         await MainActor.run {
           withAnimation {

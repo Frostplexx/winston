@@ -9,11 +9,11 @@ import SwiftUI
 import Defaults
 
 struct Inbox: View {
-  @ObservedObject var router: Router
+  var reset: Bool
+  @StateObject var router: Router
+  @StateObject var messages = ObservableArray<Message>()
+  @State var loading = false
   
-  @StateObject private var messages = ObservableArray<Message>()
-  @State private var loading = false
-  @Default(.GeneralDefSettings) private var generalDefSettings
   @Environment(\.useTheme) private var selectedTheme
   
   func fetch(_ loadMore: Bool = false, _ force: Bool = false) async {
@@ -27,15 +27,15 @@ struct Inbox: View {
       await MainActor.run {
         withAnimation {
           loading = false
-          messages.data = newItems.map { Message(data: $0) }
+          messages.data = newItems.map { Message(data: $0, api: RedditAPI.shared) }
         }
       }
     }
   }
   
   var body: some View {
-    NavigationStack(path: $router.fullPath) {
-      Group {
+    NavigationStack(path: $router.path) {
+      DefaultDestinationInjector(routerProxy: RouterProxy(router)) {
         List {
           ForEach(messages.data, id: \.self.id) { message in
             MessageLink(message: message)
@@ -46,8 +46,8 @@ struct Inbox: View {
         }
         .themedListBG(selectedTheme.lists.bg)
         .scrollContentBackground(.hidden)
+        .onChange(of: reset) { _ in router.path.removeLast(router.path.count) }
       }
-      .injectInTabDestinations(viewControllerHolder: router.navController)
       .loader(loading)
       .onAppear {
         Task(priority: .background) {
@@ -57,13 +57,9 @@ struct Inbox: View {
       .refreshable {
         await fetch(false, true)
       }
-      .onChange(of: generalDefSettings.redditCredentialSelectedID) { _ in
-        messages.data = []
-        Task(priority: .background) { await fetch(false, true) }
-      }
       .navigationTitle("Inbox")
     }
-//    .swipeAnywhere()
+    .swipeAnywhere(routerProxy: RouterProxy(router), routerContainer: router.isRootWrapper)
   }
 }
 

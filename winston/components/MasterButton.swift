@@ -66,11 +66,15 @@ struct MasterButton: View {
           .frame(height: textSize)
       }
       if let icon = icon {
-        Image(systemName: icon).contentTransition(.symbolEffect)
+        Image(systemName: icon)
+          .transition(.scaleAndBlur)
+//          .id(icon)
       }
       Group {
         if let label = label {
-          Text(label).fixedSize(horizontal: true, vertical: false)
+          Text(label)
+            .fixedSize(horizontal: true, vertical: false)
+//            .id(label)
         }
       }
       .transition(.scaleAndBlur)
@@ -92,3 +96,8 @@ struct MasterButton: View {
   }
 }
 
+struct NoBtnStyle: ButtonStyle {
+  func makeBody(configuration: Configuration) -> some View {
+    configuration.label
+  }
+}

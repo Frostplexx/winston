@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Defaults
 
 private let starsCount = 7
 private let BG_GRAD_DARK = Color.hex("FFB13D")
@@ -15,6 +14,7 @@ private let HANG_ANIM = Animation.spring(response: 0.3, dampingFraction: 0.5)
 private let ROT_ANIM = Animation.spring(response: 0.4, dampingFraction: 0.25)
 
 struct Onboarding: View {
+  @Binding var open: Bool
   @State private var currentTab = 0
   @State var showStars = false
   @State var hanging = true
@@ -23,8 +23,6 @@ struct Onboarding: View {
   @State var appID = ""
   @State var appSecret = ""
   @Environment (\.colorScheme) var colorScheme: ColorScheme
-  
-  @State var tryingToDismiss = false
   
   func nextStep() {
     withAnimation(.spring()) {
@@ -41,70 +39,54 @@ struct Onboarding: View {
   var body: some View {
     let BG_GRAD = colorScheme == .dark ? BG_GRAD_DARK : BG_GRAD_LIGHT
     TabView(selection: $currentTab) {
-      OnboardingWelcomeWrapper(nextStep: nextStep)
+      OnboardingWelcome(nextStep: nextStep)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(0)
-      OnboardingAPIIntro(prevStep: prevStep, nextStep: nextStep)
+          .tag(0)
+        OnboardingAPIIntro(prevStep: prevStep, nextStep: nextStep)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(1)
-      Onboarding1OpeningSettings(prevStep: prevStep, nextStep: nextStep)
+          .tag(1)
+        Onboarding1OpeningSettings(prevStep: prevStep, nextStep: nextStep)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(2)
-      Onboarding2CreateApp(prevStep: prevStep, nextStep: nextStep)
+          .tag(2)
+        Onboarding2CreateApp(prevStep: prevStep, nextStep: nextStep)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(3)
-      Onboarding3FillingInfo(prevStep: prevStep, nextStep: nextStep)
+          .tag(3)
+        Onboarding3FillingInfo(prevStep: prevStep, nextStep: nextStep)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(4)
-      Onboarding4GettingAppID(prevStep: prevStep, nextStep: nextStep, appID: $appID)
+          .tag(4)
+        Onboarding4GettingAppID(prevStep: prevStep, nextStep: nextStep, appID: $appID)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(5)
-      Onboarding5GettingSecret(prevStep: prevStep, nextStep: nextStep, appSecret: $appSecret)
+          .tag(5)
+        Onboarding5GettingSecret(prevStep: prevStep, nextStep: nextStep, appSecret: $appSecret)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(6)
-      Onboarding6Auth(prevStep: prevStep, nextStep: nextStep, appSecret: appSecret, appID: appID)
+          .tag(6)
+        Onboarding6Auth(prevStep: prevStep, nextStep: nextStep, appSecret: appSecret, appID: appID)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(7)
-      Onboarding7Ending()
+          .tag(7)
+        Onboarding7Ending(open: $open)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .contentShape(Rectangle())
         .simultaneousGesture(DragGesture())
-        .tag(8)
-    }
-    .alert(
-      "Are you sure?",
-      isPresented: $tryingToDismiss
-    ) {
-      Button(role: .destructive) {
-        Defaults[.GeneralDefSettings].onboardingState = .dismissed
-        Nav.present(nil)
-      } label: {
-        Text("Yes").fontWeight(.medium)
-      }
-    } message: {
-      Text("Do you really wanna dismiss the oboarding? You can reopen it later.")
-    }
-    .closeSheetBtn {
-      tryingToDismiss = true
+          .tag(8)
     }
     .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-    //    .padding(.bottom, 16)
+//    .padding(.bottom, 16)
     .onChange(of: currentTab) { _ in withAnimation { UIApplication.shared.dismissKeyboard() } }
     .background(
       ZStack {
@@ -139,7 +121,6 @@ struct Onboarding: View {
         twisted = true
       }
     }
-    .interactiveDismissDisabled(true)
   }
 }
 
@@ -193,7 +174,7 @@ struct Star: View {
       }
       .onAppear {
         timer.upstream.connect().cancel()
-        position.x = (((.screenW - 48) / CGFloat(starsCount - 1)) * CGFloat(number)) + 24 + (CGFloat.rand(0...24) * ([-1, 1].randomElement())!)
+        position.x = (((UIScreen.screenWidth - 48) / CGFloat(starsCount - 1)) * CGFloat(number)) + 24 + (CGFloat.rand(0...24) * ([-1, 1].randomElement())!)
         DispatchQueue.main.asyncAfter(deadline: .now() + CGFloat.random(in: 0...0.75)) {
           timer = Timer.publish(every: duration, on: .current, in: .common).autoconnect()
           move()

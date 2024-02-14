@@ -17,8 +17,6 @@ struct CacheItem<T>: Identifiable, Equatable {
   let id = UUID()
   let data: T
   let createdAt: Date
-  let eternal: Bool = false
-  var expires: Date? = nil
 }
 
 
@@ -31,22 +29,15 @@ class BaseCache<T: Any>: ObservableObject {
     self.cache = cache
   }
   
-  func get(key: String) -> T? {
-    if let cacheItem = cache[key], cacheItem.expires == nil || Date() < cacheItem.expires! {
-      return cacheItem.data
-    }
-    
-    return nil
-  }
-  
-  func addKeyValue(key: String, data: @escaping () -> T, expires: Date? = nil) {
+  func addKeyValue(key: String, data: @escaping () -> T) {
     if cache[key] != nil { return }
     Task(priority: .background) {
       let itemData = data()
-      let item = CacheItem(data: itemData, createdAt: Date(), expires: expires)
-      let allowedToRemoveCacheList = cache.filter { !$0.value.eternal }
-      let oldestKey = cache.count > cacheLimit ? allowedToRemoveCacheList.min { a, b in a.value.createdAt < b.value.createdAt }?.key : nil
+      // Create a new CacheItem with the current date
+      let item = CacheItem(data: itemData, createdAt: Date())
+      let oldestKey = cache.count > cacheLimit ? cache.min { a, b in a.value.createdAt < b.value.createdAt }?.key : nil
       
+      // Add the item to the cache
       await MainActor.run {
         withAnimation {
           cache[key] = item
@@ -57,18 +48,14 @@ class BaseCache<T: Any>: ObservableObject {
   }
   
   func merge(_ dict: [String:T]) async {
-    let newDict = dict.mapValues { CacheItem(data: $0, createdAt: Date()) }
-    let allowedToRemoveCacheList = cache.filter { !$0.value.eternal }
-    await MainActor.run {
-      withAnimation {
+      let newDict = dict.mapValues { CacheItem(data: $0, createdAt: Date()) }
+      await MainActor.run { [newDict] in
+        withAnimation {
           cache.merge(newDict) { (_, new) in new }
+        }
       }
-      while cache.count > cacheLimit {
-        guard let oldestKey = allowedToRemoveCacheList.min(by: { a, b in a.value.createdAt < b.value.createdAt })?.key else { return }
-        cache.removeValue(forKey: oldestKey)
-      }
-    }
   }
+  
 }
 
 class BaseObservableCache<T: ObservableObject>: ObservableObject {
@@ -80,18 +67,13 @@ class BaseObservableCache<T: ObservableObject>: ObservableObject {
     self.cache = cache
   }
   
-  func get(key: String) -> T? {
-    return cache[key]?.data
-  }
-  
-  func addKeyValue(key: String, data: @escaping () -> T, expires: Date? = nil) {
+  func addKeyValue(key: String, data: @escaping () -> T) {
     if cache[key] != nil { return }
     Task(priority: .background) {
       let itemData = data()
       // Create a new CacheItem with the current date
-      let item = CacheItem(data: itemData, createdAt: Date(), expires: expires)
-      let allowedToRemoveCacheList = cache.filter { !$0.value.eternal }
-      let oldestKey = cache.count > cacheLimit ? allowedToRemoveCacheList.min { a, b in a.value.createdAt < b.value.createdAt }?.key : nil
+      let item = CacheItem(data: itemData, createdAt: Date())
+      let oldestKey = cache.count > cacheLimit ? cache.min { a, b in a.value.createdAt < b.value.createdAt }?.key : nil
       
       // Add the item to the cache
       await MainActor.run {

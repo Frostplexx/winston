@@ -1,6 +1,6 @@
-- Markdown overhaul (tables, spoilers, quotes now supported)
-- Comment skipper button
-- Apollo style 'Navigation anywhere' - it will now drag the page as you drag your finger.
-- Custom filters to easily find posts that contain some text
-- Compact mode per subreddit
-- Misc. bug fixes and performance improvements
+# Fixed
+
+- Winston doesn't crash on iOS 16.X anymore
+- Fix some other potential instances where the app could crash
+- Fix "Show Upvote Ratio" option
+

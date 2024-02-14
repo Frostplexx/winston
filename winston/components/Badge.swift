@@ -8,249 +8,208 @@
 import Foundation
 import SwiftUI
 import Defaults
-import NukeUI
-
-struct UserFlair: View, Equatable {
-  static func == (lhs: UserFlair, rhs: UserFlair) -> Bool {
-    return lhs.flair == rhs.flair && lhs.flairText == rhs.flairText && lhs.flairBackground == rhs.flairBackground
-  }
-  
-  let flair: String
-  let flairText: ThemeText
-  let flairBackground: ColorSchemes<ThemeColor>
-  
-  var body: some View {
-    Text(flair).font(.system(size: flairText.size, weight: flairText.weight.t))
-      .lineLimit(1)
-      .foregroundColor(flairText.color())
-      .padding(EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 4))
-      .background(flairBackground())
-      .cornerRadius(4.0)
-      .allowsHitTesting(false)
-  }
-}
-
-func flairWithoutEmojis(str: String?) -> [String]? {
-  do {
-    let emojiRegex = try NSRegularExpression(pattern: ":(.*?):")
-    if let s = str {
-      let sep = "<separator>"
-      return emojiRegex.stringByReplacingMatches(in: s, range: NSMakeRange(0, s.count), withTemplate: sep)
-        .components(separatedBy: sep).map{ str in
-          return str.replacingOccurrences(of: sep, with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-        }.filter { str in
-          return !str.isEmpty
-        }
-    } else {
-      return nil
-    }
-  } catch {
-    return nil
-  }
-}
+import ObservedOptionalObject
 
 struct BadgeView: View, Equatable {
   static let authorStatsSpacing: Double = 2
   static func == (lhs: BadgeView, rhs: BadgeView) -> Bool {
-    return lhs.avatarRequest?.imageId == rhs.avatarRequest?.imageId
-//    return lhs.avatarURL == rhs.avatarURL && lhs.saved == rhs.saved && lhs.avatarRequest?.url == rhs.avatarRequest?.url && lhs.theme == rhs.theme && lhs.commentsCount == rhs.commentsCount && lhs.newCommentsCount == rhs.newCommentsCount && lhs.votesCount == rhs.votesCount && lhs.likes == rhs.likes
+    lhs.extraInfo == rhs.extraInfo && lhs.theme == rhs.theme && lhs.avatarURL == rhs.avatarURL && lhs.saved == rhs.saved && lhs.id == rhs.id
   }
   
-  var avatarRequest: ImageRequest?
-  var showAuthorOnPostLinks = true
+  @ObservedOptionalObject var post: Post?
+  
+  var id: String
   var saved = false
   var unseen = false
   var usernameColor: Color?
   var author: String
+  var flair: String?
   var fullname: String? = nil
-  var userFlair: String?
   var created: Double
   var avatarURL: String?
   var theme: BadgeTheme
   var commentTheme: CommentTheme?
-  var commentsCount: String?
-  var newCommentsCount: Int?
-  var votesCount: String?
-  var likes: Bool? = nil
-  var openSub: (() -> ())? = nil
-  var subName: String? = nil
+  var extraInfo: [BadgeExtraInfo] = []
+  var routerProxy: RouterProxy?
+  var cs: ColorScheme
+  
+  let flagY: CGFloat = 16
+  let delay: CGFloat = 0.4
     
-  nonisolated func openUser() {
-    Nav.to(.reddit(.user(User(id: author))))
+  func openUser() {
+    routerProxy?.router.path.append(User(id: author, api: RedditAPI.shared))
   }
   
   var body: some View {
     let showAvatar = theme.avatar.visible
-    let defaultIconColor = theme.statsText.color()
+        
     HStack(spacing: theme.spacing) {
       
-//      if saved && !showAvatar {
-//        Image(systemName: "bookmark.fill")
-//          .fontSize(16)
-//          .foregroundColor(.green)
-//          .transition(.scale.combined(with: .opacity))
-//          .drawingGroup()
-//      }
+      if saved && !showAvatar {
+        Image(systemName: "bookmark.fill")
+          .fontSize(16)
+          .foregroundColor(.green)
+          .transition(.scale.combined(with: .opacity))
+      }
       
       if showAvatar {
-        AvatarRaw(saved: saved, avatarImgRequest: avatarRequest, userID: author, fullname: fullname, theme: theme.avatar)
-          .equatable()
-          .highPriorityGesture(TapGesture().onEnded(openUser))
+        ZStack {
+          Avatar(url: avatarURL, userID: author, fullname: fullname, theme: theme.avatar)
+            .background(
+              ZStack {
+                Image(systemName: "bookmark.fill")
+                  .foregroundColor(.green)
+                  .offset(y: saved ? flagY : 0)
+                
+                Circle()
+                  .fill(.gray)
+                  .performantShadow(cornerRadius: 15, color: .black, opacity: 0.15, radius: 4, offsetY: 4, size: CGSize(width: 30, height: 30))
+                  .frame(maxWidth: .infinity, maxHeight: .infinity)
+                  .mask(
+                    Image(systemName: "bookmark.fill")
+                      .foregroundColor(.black)
+                      .offset(y: saved ? flagY : 0)
+                  )
+                
+                Circle()
+                  .fill(.gray)
+                  .frame(maxWidth: .infinity, maxHeight: .infinity)
+              }
+                .compositingGroup()
+                .animation(.interpolatingSpring(stiffness: 150, damping: 12).delay(delay), value: saved)
+            )
+            .scaleEffect(1)
+            .onTapGesture(perform: openUser)
+        }
       }
       
       VStack(alignment: .leading, spacing: BadgeView.authorStatsSpacing) {
         
-        if showAuthorOnPostLinks {
-          HStack(alignment: .center, spacing: 4) {
-            
-            Text(author).font(.system(size: theme.authorText.size, weight: theme.authorText.weight.t)).foregroundStyle(author == "[deleted]" ? .red : usernameColor ?? theme.authorText.color()).lineLimit(1)
+        HStack(alignment: .center, spacing: 6) {
+          Text(author).font(.system(size: theme.authorText.size, weight: theme.authorText.weight.t)).foregroundColor(author == "[deleted]" ? .red : usernameColor ?? theme.authorText.color.cs(cs).color())
               .onTapGesture(perform: openUser)
-            
-            if unseen {
-              PostLinkGlowDot(unseenType: .dot(commentTheme?.unseenDot ?? ColorSchemes<ThemeColor>(light: .init(hex: "FF0000"), dark: .init(hex: "FF0000"))), seen: false, badge: true).equatable()
+          
+          if unseen {
+            ZStack {
+              Circle()
+                .fill(commentTheme?.unseenDot.cs(cs).color() ?? .red)
+                .frame(width: 6, height: 6)
+              Circle()
+                .fill(commentTheme?.unseenDot.cs(cs).color() ?? .red)
+                .frame(width: 8, height: 8)
+                .blur(radius: 8)
             }
-            
-            if let flairs = flairWithoutEmojis(str: userFlair) {
-              // TODO Load flair emojis via GET /api/v1/{subreddit}/emojis/{emoji_name}
-              ForEach(flairs, id: \.self) {
-                UserFlair(flair: $0, flairText: theme.flairText, flairBackground: theme.flairBackground).equatable()
-              }
-            }
-            
-            if let openSub = openSub, let subName = subName {
-              if theme.forceSubsAsTags {
-                Tag(subredditIconKit: nil, text: "r/\(subName)", color: theme.subColor(), fontSize: theme.authorText.size, backgroundColor: theme.subColor())
-                .onTapGesture(perform: openSub)
-              } else {
-                Image(systemName: "arrowshape.right.fill")
-                  .fontSize(theme.authorText.size * 0.75)
-                  .foregroundStyle(theme.authorText.color().opacity(0.5))
-                Text(subName).foregroundStyle(theme.subColor())
-                  .fontSize(theme.authorText.size, .semibold).lineLimit(1)
-                  .highPriorityGesture(TapGesture().onEnded(openSub))
+          }
+          
+          if let f = flair?.trimmingCharacters(in: .whitespacesAndNewlines) {
+            if !f.isEmpty {
+              let colonIndex = f.lastIndex(of: ":")
+              let flairWithoutEmoji = String(f[(f.contains(":") ? f.index(colonIndex!, offsetBy: min(2, max(0, f.count - f.distance(from: f.startIndex, to: colonIndex!)))) : f.startIndex)...])
+              if !flairWithoutEmoji.isEmpty {
+                // TODO Load flair emojis via GET /api/v1/{subreddit}/emojis/{emoji_name}
+                Text(flairWithoutEmoji).font(.system(size: theme.flairText.size, weight: theme.flairText.weight.t)).lineLimit(1).foregroundColor(theme.flairText.color.cs(cs).color()).padding(EdgeInsets(top: 0, leading: 6, bottom: 0, trailing: 6)).background(theme.flairBackground.cs(cs).color()).clipShape(Capsule())
               }
             }
           }
         }
         
-        
-        HStack(alignment: .center, spacing: theme.statsText.size * 0.416666667 /* Yes, absurd number, I thought it was funny */) {
-          
-          if let openSub = openSub, let subName = subName, !showAuthorOnPostLinks {
-            Tag(subredditIconKit: nil, text: "r/\(subName)", color: theme.subColor(), fontSize: theme.statsText.size, backgroundColor: theme.subColor())
-              .highPriorityGesture(TapGesture().onEnded(openSub))
-          }
-          
-          if let commentsCount = commentsCount {
-            HStack(alignment: .center, spacing: 2) {
-              Image(systemName: "message.fill")
-              Text(commentsCount).contentTransition(.numericText())
+        HStack(alignment: .center, spacing: 6) {
+          ForEach(extraInfo, id: \.self){ elem in
+            HStack(alignment: .center, spacing: 2){
+              Image(systemName: elem.systemImage)
+                .foregroundColor(elem.iconColor ?? theme.statsText.color.cs(cs).color())
+              Text(elem.text)
+              
+              if elem.type == "comments", let seenComments = post?.data?.winstonSeenCommentCount, let totalComments = Int(elem.text) {
+                let unseenComments = totalComments - seenComments
+                if unseenComments > 0 {
+                  Text("(\(Int(unseenComments)))").foregroundColor(.accentColor)
+                }
+              }
             }
-          }
-          
-          if let newComments = newCommentsCount {
-            if newComments > 0 {
-              Text("(\(newComments))").foregroundColor(.accentColor)
-            }
-          }
-          
-          if let votesCount = votesCount {
-            HStack(alignment: .center, spacing: 2) {
-              Image(systemName: "arrow.up")
-              Text(votesCount).contentTransition(.numericText())
-            }
-            .foregroundStyle(likes == nil ? defaultIconColor : likes == true ? .orange : .blue)
           }
           
           HStack(alignment: .center, spacing: 2) {
             Image(systemName: "hourglass.bottomhalf.filled")
             Text(timeSince(Int(created)))
           }
-          
         }
-        .foregroundStyle(defaultIconColor)
+        .foregroundColor(theme.statsText.color.cs(cs).color())
         .font(.system(size: theme.statsText.size, weight: theme.statsText.weight.t))
+        .compositingGroup()
       }
-//      .drawingGroup()
     }
     .scaleEffect(1)
-    .animation(showAvatar ? nil : spring.delay(0.4), value: saved)
+    .animation(showAvatar ? nil : spring.delay(delay), value: saved)
   }
 }
 
-struct Badge: View {
-  var showVotes = false
-  var post: Post
+
+struct Badge: View, Equatable {
+  static func == (lhs: Badge, rhs: Badge) -> Bool {
+    lhs.extraInfo == rhs.extraInfo && lhs.theme == rhs.theme && lhs.avatarURL == rhs.avatarURL
+  }
+  
+  @ObservedOptionalObject var post: Post?
   var usernameColor: Color?
   var avatarURL: String?
   var theme: BadgeTheme
-  //  var extraInfo: [BadgeExtraInfo] = []
-  
-  
+  var extraInfo: [BadgeExtraInfo] = []
+  @EnvironmentObject private var routerProxy: RouterProxy
+  @Environment(\.colorScheme) private var cs: ColorScheme
+
   var body: some View {
-    if let data = post.data {
-      //      let extraInfo = showVotes ? [BadgeExtraInfo(systemImage: "message.fill", text: "\(formatBigNumber(data.num_comments))"), BadgeExtraInfo(systemImage: "arrow.up", text: "\(formatBigNumber(data.ups))")] : [BadgeExtraInfo(systemImage: "message.fill", text: "\(formatBigNumber(data.num_comments))")]
-      BadgeView(saved: data.saved, usernameColor: usernameColor, author: data.author, fullname: data.author_fullname, userFlair: data.author_flair_text, created: data.created, avatarURL: avatarURL, theme: theme, commentsCount: formatBigNumber(data.num_comments), votesCount: !showVotes ? nil : formatBigNumber(data.ups))
+    if let data = post?.data {
+      BadgeView(post: post, id: data.id, usernameColor: usernameColor, author: data.author, flair: data.author_flair_text, fullname: data.author_fullname, created: data.created, avatarURL: avatarURL, theme: theme, extraInfo: extraInfo, routerProxy: routerProxy, cs: cs)
     }
-  }
-}
-
-struct BadgeKit: Equatable {
-  let numComments: Int
-  let ups: Int
-  let saved: Bool
-  let author: String
-  let authorFullname: String
-  let userFlair: String
-  let created: Double
-}
-
-struct BadgeOpt: View, Equatable {
-  static func == (lhs: BadgeOpt, rhs: BadgeOpt) -> Bool {
-    return lhs.badgeKit == rhs.badgeKit && lhs.theme == rhs.theme && lhs.avatarRequest?.url == rhs.avatarRequest?.url
-  }
-  
-  var avatarRequest: ImageRequest?
-  let badgeKit: BadgeKit
-  var showVotes = false
-  var usernameColor: Color?
-  var avatarURL: String?
-  var theme: BadgeTheme
-  var openSub: (() -> ())? = nil
-  var subName: String? = nil
-  
-  var body: some View {
-      BadgeView(avatarRequest: avatarRequest ?? Caches.avatars.cache[badgeKit.authorFullname]?.data, saved: badgeKit.saved, usernameColor: usernameColor, author: badgeKit.author, fullname: badgeKit.authorFullname, userFlair: badgeKit.userFlair, created: badgeKit.created, avatarURL: avatarURL, theme: theme, commentsCount: formatBigNumber(badgeKit.numComments), votesCount: !showVotes ? nil : formatBigNumber(badgeKit.ups), openSub: openSub, subName: subName)
   }
 }
 
 struct BadgeComment: View, Equatable {
   static func == (lhs: BadgeComment, rhs: BadgeComment) -> Bool {
-    return lhs.badgeKit == rhs.badgeKit && lhs.theme == rhs.theme && lhs.unseen == rhs.unseen
+    lhs.extraInfo == rhs.extraInfo && lhs.theme == rhs.theme && lhs.avatarURL == rhs.avatarURL && lhs.comment.data?.id == rhs.comment.data?.id
   }
   
-  let badgeKit: BadgeKit
-  var showVotes = false
+  @ObservedObject var comment: Comment
   var unseen: Bool
   var usernameColor: Color?
   var avatarURL: String?
   var theme: BadgeTheme
-  @ObservedObject private var avatarCache = Caches.avatars
+  var commentTheme: CommentTheme?
+  var extraInfo: [BadgeExtraInfo] = []
+  @EnvironmentObject private var routerProxy: RouterProxy
+  @Environment(\.colorScheme) private var cs: ColorScheme
   
   var body: some View {
-    BadgeView(avatarRequest: avatarCache.cache[badgeKit.authorFullname]?.data, saved: badgeKit.saved, unseen: unseen, usernameColor: usernameColor, author: badgeKit.author, fullname: badgeKit.authorFullname, userFlair: badgeKit.userFlair, created: badgeKit.created, avatarURL: avatarURL, theme: theme, commentsCount: formatBigNumber(badgeKit.numComments), votesCount: !showVotes ? nil : formatBigNumber(badgeKit.ups))
+    if let data = comment.data, let author = data.author, let created = data.created {
+      BadgeView(id: data.id, unseen: unseen, usernameColor: usernameColor, author: author, flair: data.author_flair_text, fullname: data.author_fullname, created: created, avatarURL: avatarURL, theme: theme, commentTheme: commentTheme, extraInfo: extraInfo, routerProxy: routerProxy, cs: cs)
+      
+    }
   }
 }
 
-struct BadgeExtraInfo: Hashable, Equatable, Identifiable {
-  static func == (lhs: BadgeExtraInfo, rhs: BadgeExtraInfo) -> Bool {
-    lhs.id == rhs.id
-  }
+struct BadgeExtraInfo: Hashable {
+  var type: String
   var systemImage: String = ""
   var text: String
-  //    var textColor: Color = Color.primary
+  //  var textColor: Color = Color.primary
   var iconColor: Color?
-  var id: String {
-    systemImage + text
+}
+
+
+struct PresetBadgeExtraInfo {
+  
+  init(){}
+  
+  func upvotesExtraInfo(data: PostData) -> BadgeExtraInfo{
+    //    let upvoted = data.likes != nil && data.likes!
+    //    let downvoted = data.likes != nil && !data.likes!
+    //    return BadgeExtraInfo(systemImage: upvoted  ? "arrow.up" : (downvoted ? "arrow.down" : "arrow.up"), text: "\(formatBigNumber(data.ups))",textColor: upvoted ? .orange : (downvoted ? .blue : .primary), iconColor:  upvoted ? .orange : (downvoted ? .blue : .primary))
+    return BadgeExtraInfo(type: "ups", systemImage: "arrow.up", text: "\(formatBigNumber(data.ups))")
   }
+  
+  func commentsExtraInfo(data: PostData) -> BadgeExtraInfo{
+    return BadgeExtraInfo(type: "comments", systemImage: "message.fill", text: "\(formatBigNumber(data.num_comments))")
+  }
+  
 }

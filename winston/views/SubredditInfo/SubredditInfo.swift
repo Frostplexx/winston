@@ -36,7 +36,7 @@ struct SubredditInfo: View {
       Group {
         if let data = subreddit.data {
           VStack(spacing: 12) {
-            SubredditIcon(subredditIconKit: data.subredditIconKit, size: 125)
+            SubredditIcon(data: data, size: 125)
             
             VStack {
               Text("r/\(data.display_name ?? "")")
@@ -74,7 +74,7 @@ struct SubredditInfo: View {
                       addedToFavs.toggle()
                     }
                   } else {
-                    subreddit.favoriteToggle()
+                    await subreddit.favoriteToggle()
                   }
                 }
               } label: {

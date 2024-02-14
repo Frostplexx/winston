@@ -24,11 +24,10 @@ extension CachedMulti {
   @NSManaged public var path: String?
   @NSManaged public var uuid: String?
   @NSManaged public var subreddits: Set<CachedSub>?
-  @NSManaged public var winstonCredentialID: UUID?
   
-  convenience init(data: MultiData, context: NSManagedObjectContext, credentialID: UUID) {
+  convenience init(data: MultiData, context: NSManagedObjectContext) {
     self.init(context: context)
-    update(data, credentialID: credentialID)
+    update(data)
   }
   
   public var subsArray: [CachedSub] {
@@ -38,12 +37,10 @@ extension CachedMulti {
     }
   }
   
-  func getSubEntities(_ subs: [MultiSub], context: NSManagedObjectContext, credentialID: UUID) -> [CachedSub] {
-    guard let currentCredentialID = RedditCredentialsManager.shared.selectedCredential?.id else { return [] }
+  func getSubEntities(_ subs: [MultiSub], context: NSManagedObjectContext) -> [CachedSub] {
     var cachedSubs: [String:CachedSub] = [:]
-    let fetchRequest = NSFetchRequest<CachedSub>(entityName: "CachedSub")
-      fetchRequest.predicate = NSPredicate(format: "winstonCredentialID == %@", currentCredentialID as CVarArg)
-    if let results = (context.performAndWait { try? context.fetch(fetchRequest) }) {
+    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "CachedSub")
+    if let results = (context.performAndWait { try? context.fetch(fetchRequest) as? [CachedSub] }) {
       results.forEach { cachedSub in
         context.performAndWait {
           if let name = cachedSub.name {
@@ -56,16 +53,16 @@ extension CachedMulti {
     return subs.compactMap { subData in
       if let data = subData.data, let found = cachedSubs[data.name] { return found }
       if let y = subData.data {
-        let newCachedSub = CachedSub(data: y, context: context, credentialID: currentCredentialID)
+        let newCachedSub = CachedSub(data: y, context: context)
         return newCachedSub
       }
       return nil
     }
   }
   
-  func update(_ data: MultiData, credentialID: UUID) {
+  func update(_ data: MultiData) {
     guard let ctx = self.managedObjectContext else { return }
-    let subs = getSubEntities(data.subreddits ?? [], context: ctx, credentialID: credentialID)
+    let subs = getSubEntities(data.subreddits ?? [], context: ctx)
     self.display_name = data.display_name
     self.icon_url = data.icon_url ?? ""
     self.key_color = data.key_color ?? ""
@@ -74,7 +71,6 @@ extension CachedMulti {
     self.path = data.path
     self.uuid = data.id
     self.subreddits = Set(subs)
-    self.winstonCredentialID = credentialID
   }
   
 }

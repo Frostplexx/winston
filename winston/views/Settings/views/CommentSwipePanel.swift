@@ -9,14 +9,14 @@ import SwiftUI
 import Defaults
 
 struct CommentSwipePanel: View {
-  @Default(.CommentLinkDefSettings) private var commentLinkDefSettings
+  @Default(.commentSwipeActions) private var commentSwipeActions
   @Environment(\.useTheme) private var theme
   var body: some View {
     List {
       
       Section {
         Group {
-          Picker(selection: $commentLinkDefSettings.swipeActions.leftFirst) {
+          Picker(selection: $commentSwipeActions.leftFirst) {
             ForEach(allCommentSwipeActions) { act in
               Label(act.label, systemImage: act.icon.normal)
                 .tag(act)
@@ -25,7 +25,7 @@ struct CommentSwipePanel: View {
             Label("Drag Left", image: "dragLeft")
           }
           
-          Picker(selection: $commentLinkDefSettings.swipeActions.rightFirst) {
+          Picker(selection: $commentSwipeActions.rightFirst) {
             ForEach(allCommentSwipeActions) { act in
               Label(act.label, systemImage: act.icon.normal)
                 .tag(act)
@@ -34,7 +34,7 @@ struct CommentSwipePanel: View {
             Label("Drag Right", image: "dragRight")
           }
           
-          Picker(selection: $commentLinkDefSettings.swipeActions.leftSecond) {
+          Picker(selection: $commentSwipeActions.leftSecond) {
             ForEach(allCommentSwipeActions) { act in
               Label(act.label, systemImage: act.icon.normal)
                 .tag(act)
@@ -43,7 +43,7 @@ struct CommentSwipePanel: View {
             Label("Long Drag Left", image: "longDragLeft")
           }
           
-          Picker(selection: $commentLinkDefSettings.swipeActions.rightSecond) {
+          Picker(selection: $commentSwipeActions.rightSecond) {
             ForEach(allCommentSwipeActions) { act in
               Label(act.label, systemImage: act.icon.normal)
                 .tag(act)
@@ -52,9 +52,9 @@ struct CommentSwipePanel: View {
             Label("Long Drag Right", image: "longDragRight")
           }
         }
-//        .themedListRowLikeBG(enablePadding: true, disableBG: true)
+        .themedListRowBG(enablePadding: true)
       }
-      .themedListSection()
+      .themedListDividers()
       
     }
     .themedListBG(theme.lists.bg)

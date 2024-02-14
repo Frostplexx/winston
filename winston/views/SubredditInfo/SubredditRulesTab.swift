@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import MarkdownUI
 
 struct SubredditRulesTab: View {
   @ObservedObject var subreddit: Subreddit
@@ -45,9 +44,7 @@ struct SubredditRulesTab: View {
                   Text(rule.short_name ?? "Unamed rule")
                     .fontSize(22, .bold)
                   
-                  let text = MarkdownUtil.formatForMarkdown(rule.description ?? "")
-                  Markdown(text.isEmpty ? "Rule without description." : text)
-                    .markdownTheme(.winstonMarkdown(fontSize: 16))
+                  MD(.str(rule.description ?? "Rule without description."), fontSize: 16)
                 }
               }
               .multilineTextAlignment(.leading)

@@ -11,6 +11,7 @@ import Defaults
 struct ShortPostLink: View {
   var noHPad = false
   var post: Post
+  @EnvironmentObject private var routerProxy: RouterProxy
   @Environment(\.useTheme) private var selectedTheme
 
   var body: some View {
@@ -21,23 +22,25 @@ struct ShortPostLink: View {
         Text((data.selftext).md()).lineLimit(2)
           .fontSize(15).opacity(0.75)
         HStack {
-//          if let fullname = data.author_fullname {
-            Badge(showVotes: true, post: post, theme: selectedTheme.postLinks.theme.badge)
-//              .equatable()
-//          }
+          if let fullname = data.author_fullname {
+            Badge(post: post, theme: selectedTheme.postLinks.theme.badge, extraInfo: [PresetBadgeExtraInfo().commentsExtraInfo(data: data), PresetBadgeExtraInfo().upvotesExtraInfo(data: data)])
+              .equatable()
+          }
           Spacer()
-          Tag(text: "r/\(data.subreddit)", color: selectedTheme.postLinks.theme.badge.subColor())
+          FlairTag(text: "r/\(data.subreddit)", color: .blue)
             .highPriorityGesture(TapGesture().onEnded {
-              Nav.to(.reddit(.subFeed(Subreddit(id: data.subreddit))))
+              routerProxy.router.path.append(SubViewType.posts(Subreddit(id: data.subreddit, api: post.redditAPI)))
             })
         }
       }
       .padding(.horizontal, noHPad ? 0 : 16)
       .padding(.vertical, 14)
       .frame(maxWidth: .infinity, alignment: .leading)
-      .themedListRowLikeBG()
+      .themedListRowBG()
       .mask(RR(20, Color.black))
-      .onTapGesture { Nav.to(.reddit(.post(post))) }
+      .onTapGesture {
+        routerProxy.router.path.append(PostViewPayload(post: post, postSelfAttr: nil, sub: Subreddit(id: data.subreddit, api: post.redditAPI)))
+      }
     }
   }
 }

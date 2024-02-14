@@ -32,6 +32,7 @@ extension ThemeStoreAPI {
                         completion(nil)
                     }
                 case .failure(let error):
+                    Oops.shared.sendError(error)
                     print(error)
                     completion(nil)
                 }

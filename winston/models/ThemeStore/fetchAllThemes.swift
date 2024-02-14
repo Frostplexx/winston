@@ -28,6 +28,7 @@ extension ThemeStoreAPI {
                 case .success(let data):
                     return data
                 case .failure(let error):
+                    Oops.shared.sendError(error)
                     print(error)
                     return nil
             }

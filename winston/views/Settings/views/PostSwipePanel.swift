@@ -9,14 +9,14 @@ import SwiftUI
 import Defaults
 
 struct PostSwipePanel: View {
-  @Default(.PostLinkDefSettings) private var postLinkDefSettings
+  @Default(.postSwipeActions) private var postSwipeActions
   @Environment(\.useTheme) private var theme
     var body: some View {
       List {
         
         Section {
           Group {
-            Picker(selection: $postLinkDefSettings.swipeActions.leftFirst) {
+            Picker(selection: $postSwipeActions.leftFirst) {
               ForEach(allPostSwipeActions) { act in
                 Label(act.label, systemImage: act.icon.normal)
                   .tag(act)
@@ -25,7 +25,7 @@ struct PostSwipePanel: View {
               Label("Drag Left", image: "dragLeft")
             }
             
-            Picker(selection: $postLinkDefSettings.swipeActions.rightFirst) {
+            Picker(selection: $postSwipeActions.rightFirst) {
               ForEach(allPostSwipeActions) { act in
                 Label(act.label, systemImage: act.icon.normal)
                   .tag(act)
@@ -34,7 +34,7 @@ struct PostSwipePanel: View {
               Label("Drag Right", image: "dragRight")
             }
             
-            Picker(selection: $postLinkDefSettings.swipeActions.leftSecond) {
+            Picker(selection: $postSwipeActions.leftSecond) {
               ForEach(allPostSwipeActions) { act in
                 Label(act.label, systemImage: act.icon.normal)
                   .tag(act)
@@ -43,7 +43,7 @@ struct PostSwipePanel: View {
               Label("Long Drag Left", image: "longDragLeft")
             }
             
-            Picker(selection: $postLinkDefSettings.swipeActions.rightSecond) {
+            Picker(selection: $postSwipeActions.rightSecond) {
               ForEach(allPostSwipeActions) { act in
                 Label(act.label, systemImage: act.icon.normal)
                   .tag(act)
@@ -52,9 +52,9 @@ struct PostSwipePanel: View {
               Label("Long Drag Right", image: "longDragRight")
             }
           }
-//          .themedListRowLikeBG(enablePadding: true, disableBG: true)
+          .themedListRowBG(enablePadding: true)
         }
-        .themedListSection()
+        .themedListDividers()
         
       }
       .themedListBG(theme.lists.bg)

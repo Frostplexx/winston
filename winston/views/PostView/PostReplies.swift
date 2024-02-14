@@ -16,23 +16,18 @@ struct PostReplies: View {
   var highlightID: String?
   var sort: CommentSortOption
   var proxy: ScrollViewProxy
-  var geometryReader: GeometryProxy
   @Environment(\.useTheme) private var selectedTheme
+  @Environment(\.colorScheme) private var cs
   
+  @StateObject private var comments = ObservableArray<Comment>()
+  @ObservedObject private var globalLoader = TempGlobalState.shared.globalLoader
   @State private var loading = true
   @State var seenComments : String?
-  
-  // MARK: Properties related to comment skipper
-  @Binding var topVisibleCommentId: String?
-  @Binding var previousScrollTarget: String?
-  @ObservedObject var comments: ObservableArray<Comment>
-  
-  @Environment(\.globalLoaderDismiss) private var globalLoaderDismiss
   
   func asyncFetch(_ full: Bool, _ altIgnoreSpecificComment: Bool? = nil) async {
     if let result = await post.refreshPost(commentID: (altIgnoreSpecificComment ?? ignoreSpecificComment) ? nil : highlightID, sort: sort, after: nil, subreddit: subreddit.data?.display_name ?? subreddit.id, full: full), let newComments = result.0 {
       Task(priority: .background) {
-        _ = await RedditAPI.shared.updateCommentsWithAvatar(comments: newComments, avatarSize: selectedTheme.comments.theme.badge.avatar.size)
+        await RedditAPI.shared.updateAvatarURLCacheFromComments(comments: newComments, avatarSize: selectedTheme.comments.theme.badge.avatar.size)
       }
       newComments.forEach { $0.parentWinston = comments }
       await MainActor.run {
@@ -40,7 +35,6 @@ struct PostReplies: View {
           comments.data = newComments
           loading = false
         }
-
         if var specificID = highlightID {
           specificID = specificID.hasPrefix("t1_") ? String(specificID.dropFirst(3)) : specificID
           doThisAfter(0.1) {
@@ -63,9 +57,10 @@ struct PostReplies: View {
     let theme = selectedTheme.comments
     let horPad = theme.theme.outerHPadding
     Group {
+      let commentsData = comments.data
       let postFullname = post.data?.name ?? ""
       Group {
-        ForEach(Array(comments.data.enumerated()), id: \.element.id) { i, comment in
+        ForEach(Array(commentsData.enumerated()), id: \.element.id) { i, comment in
           Section {
             
             Spacer()
@@ -74,33 +69,28 @@ struct PostReplies: View {
             
             Spacer()
               .frame(maxWidth: .infinity, minHeight: theme.theme.cornerRadius * 2, maxHeight: theme.theme.cornerRadius * 2, alignment: .top)
-              .background(CommentBG(cornerRadius: theme.theme.cornerRadius, pos: .top).fill(theme.theme.bg()))
+              .background(CommentBG(cornerRadius: theme.theme.cornerRadius, pos: .top).fill(theme.theme.bg.cs(cs).color()))
               .frame(maxWidth: .infinity, minHeight: theme.theme.cornerRadius, maxHeight: theme.theme.cornerRadius, alignment: .top)
               .clipped()
               .id("\(comment.id)-top-decoration")
+              .listRowInsets(EdgeInsets(top: 0, leading: horPad, bottom: 0, trailing: horPad))
             
-            if let commentWinstonData = comment.winstonData {
-              CommentLink(highlightID: ignoreSpecificComment ? nil : highlightID, post: post, subreddit: subreddit, postFullname: postFullname, seenComments: seenComments, parentElement: .post(comments), comment: comment, commentWinstonData: commentWinstonData, children: comment.childrenWinston)
-                .if(comments.data.firstIndex(of: comment) != nil) { view in
-                  view.anchorPreference(
-                    key: CommentUtils.AnchorsKey.self,
-                    value: .center
-                  ) { [comment.id: $0] }
-                }
-            }
+            CommentLink(highlightID: ignoreSpecificComment ? nil : highlightID, post: post, subreddit: subreddit, postFullname: postFullname, seenComments: seenComments, parentElement: .post(comments), comment: comment)
+            //                .equatable()
             
             Spacer()
               .frame(maxWidth: .infinity, minHeight: theme.theme.cornerRadius * 2, maxHeight: theme.theme.cornerRadius * 2, alignment: .top)
-              .background(CommentBG(cornerRadius: theme.theme.cornerRadius, pos: .bottom).fill(theme.theme.bg()))
+              .background(CommentBG(cornerRadius: theme.theme.cornerRadius, pos: .bottom).fill(theme.theme.bg.cs(cs).color()))
               .frame(maxWidth: .infinity, minHeight: theme.theme.cornerRadius, maxHeight: theme.theme.cornerRadius, alignment: .bottom)
               .clipped()
               .id("\(comment.id)-bot-decoration")
+              .listRowInsets(EdgeInsets(top: 0, leading: horPad, bottom: 0, trailing: horPad))
             
             Spacer()
               .frame(maxWidth: .infinity, minHeight: theme.spacing / 2, maxHeight: theme.spacing / 2)
               .id("\(comment.id)-bot-spacer")
             
-            if comments.data.count - 1 != i {
+            if commentsData.count - 1 != i {
               NiceDivider(divider: theme.divider)
                 .id("\(comment.id)-bot-divider")
             }
@@ -121,7 +111,7 @@ struct PostReplies: View {
             .onChange(of: ignoreSpecificComment) { val in
               Task(priority: .background) {
                 await asyncFetch(post.data == nil, val)
-                globalLoaderDismiss()
+                globalLoader.dismiss()
               }
               if val {
                 withAnimation(spring) {
@@ -134,7 +124,6 @@ struct PostReplies: View {
         .listRowBackground(Color.clear)
         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
       }
-      
       if loading {
         ProgressView()
           .progressViewStyle(.circular)
@@ -146,16 +135,17 @@ struct PostReplies: View {
                 await asyncFetch(post.data == nil)
               }
             }
-            withAnimation { seenComments = post.winstonData?.seenComments }
           }
           .id("loading-comments")
-      } else if comments.data.count == 0 {
-        Text(QuirkyMessageUtil.noCommentsFoundMessage())
+      } else if commentsData.count == 0 {
+        Text("No comments around...")
           .frame(maxWidth: .infinity, minHeight: 300)
           .opacity(0.25)
           .listRowBackground(Color.clear)
           .id("no-comments-placeholder")
       }
+    }.onAppear() {
+      seenComments = post.data?.winstonSeenComments
     }
   }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct Onboarding7Ending: View {
-  @Environment(\.dismiss) private var dismiss
+  @Binding var open: Bool
   
   var body: some View {
     VStack(spacing: 16) {
@@ -27,7 +27,7 @@ struct Onboarding7Ending: View {
       
       MasterButton(icon: "party.popper.fill", label: "Start using Winston!", colorHoverEffect: .animated, textSize: 18, height: 48, fullWidth: true, cornerRadius: 16, action: {
         withAnimation {
-          dismiss()
+          open = false
         }
       })
     }

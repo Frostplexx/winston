@@ -9,45 +9,34 @@ import SwiftUI
 import Defaults
 
 struct SubredditsStack: View {
-  @ObservedObject var router: Router
-  @Default(.BehaviorDefSettings) private var behaviorDefSettings // handle default feed selection routing
-  @Default(.GeneralDefSettings) private var generalDefSettings // handle default feed selection routing
+  var reset: Bool
+  @StateObject var router: Router
+  @State var selectedSub: FirstSelectable?
+  @Default(.preferenceDefaultFeed) private var preferenceDefaultFeed // handle default feed selection routing
   @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
   @State private var sidebarSize: CGSize = .zero
   
-  var postContentWidth: CGFloat { .screenW - (!IPAD || columnVisibility == .detailOnly ? 0 : sidebarSize.width) }
+  var postContentWidth: CGFloat { UIScreen.screenWidth - (!IPAD || columnVisibility != .doubleColumn ? 0 : sidebarSize.width) }
   
   @State private var loaded = false
   var body: some View {
     NavigationSplitView(columnVisibility: $columnVisibility) {
-      if let redditCredentialSelectedID = generalDefSettings.redditCredentialSelectedID {
-        Subreddits(selectedSub: $router.firstSelected, loaded: loaded, currentCredentialID: redditCredentialSelectedID)
-          .equatable()
-          .measure($sidebarSize).id("subreddits-list-\(redditCredentialSelectedID)")
-          .injectInTabDestinations(viewControllerHolder: router.navController)
-      }
+      Subreddits(selectedSub: $selectedSub, loaded: loaded, routerProxy: RouterProxy(router))
+        .measure($sidebarSize)
     } detail: {
       NavigationStack(path: $router.path) {
-        Group {
-          if let firstSelected = router.firstSelected {
-            switch firstSelected {
-            case .reddit(.multiFeed(let multi)):
+        DefaultDestinationInjector(routerProxy: RouterProxy(router)) {
+          if let selectedSub = selectedSub {
+            switch selectedSub {
+            case .multi(let multi):
               MultiPostsView(multi: multi)
-                .id("\(multi.id)-multi-first-tab")
-            case .reddit(.subFeed(let sub)):
+                .id(multi.id)
+            case .sub(let sub):
               SubredditPosts(subreddit: sub)
-                .equatable()
-                .id("\(sub.id)-sub-first-tab")
-            case .reddit(.post(let post)):
-              if let sub = post.winstonData?.subreddit {
-                PostView(post: post, subreddit: sub)
-                  .id("\(post.id)-post-first-tab")
-              }
-            case .reddit(.user(let user)):
-              UserView(user: user)
-                .id("\(user.id)-user-first-tab")
-            default:
-              EmptyView()
+                .id(sub.id)
+            case .post(let payload):
+              PostView(post: payload.post, subreddit: payload.sub)
+                .id(payload.post.id)
             }
           } else {
             VStack(spacing: 24) {
@@ -65,15 +54,16 @@ struct SubredditsStack: View {
             }
           }
         }
-        .injectInTabDestinations(viewControllerHolder: router.navController)
-        .task(priority: .background) {
+        .task {
           if !loaded {
             // MARK: Route to default feed
-            if behaviorDefSettings.preferenceDefaultFeed != "subList" && router.path.count == 0 { // we are in subList, can ignore
-              let tempSubreddit = Subreddit(id: behaviorDefSettings.preferenceDefaultFeed)
-              router.navigateTo(.reddit(.subFeed(tempSubreddit)))
+            if preferenceDefaultFeed != "subList" && router.path.count == 0 { // we are in subList, can ignore
+              let tempSubreddit = Subreddit(id: preferenceDefaultFeed, api: RedditAPI.shared)
+              router.path.append(SubViewType.posts(tempSubreddit))
             }
-
+            
+            _ = await RedditAPI.shared.fetchSubs()
+            _ = await RedditAPI.shared.fetchMyMultis()
             withAnimation {
               loaded = true
             }
@@ -82,7 +72,13 @@ struct SubredditsStack: View {
       }
       .environment(\.contentWidth, postContentWidth)
     }
-//    .swipeAnywhere()
+    .swipeAnywhere(routerProxy: RouterProxy(router), routerContainer: router.isRootWrapper)
     .environment(\.contentWidth, postContentWidth)
+    .onChange(of: reset) { _ in
+      withAnimation {
+        router.path.removeLast(router.path.count)
+        selectedSub = nil
+      }
+    }
   }
 }

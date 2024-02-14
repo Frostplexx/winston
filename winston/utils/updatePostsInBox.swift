@@ -8,7 +8,6 @@
 import Foundation
 import Defaults
 import SwiftUI
-import CoreData
 
 func updatePostsInBox(_ redditAPI: RedditAPI, force: Bool = false) async {
   let postsInBox = Defaults[.postsInBox]
@@ -23,8 +22,7 @@ func updatePostsInBox(_ redditAPI: RedditAPI, force: Bool = false) async {
     posts.forEach { data in
       postsDict[data.name] = data
     }
-    
-    var newPostsInBox = postsInBox.map({ post in
+    let newPostsInBox = postsInBox.map({ post in
       var newPost = post
       if let newData = postsDict[post.fullname] {
         newPost.score = newData.ups
@@ -32,23 +30,6 @@ func updatePostsInBox(_ redditAPI: RedditAPI, force: Bool = false) async {
       }
       return newPost
     })
-    
-    let context = PersistenceController.shared.container.newBackgroundContext()
-    let fetchRequest = NSFetchRequest<SeenPost>(entityName: "SeenPost")
-    if let results = (await context.perform(schedule: .enqueued) { try? context.fetch(fetchRequest) }) {
-      await context.perform(schedule: .enqueued) {
-        newPostsInBox = postsInBox.map({ post in
-          var newPost = post
-          
-          if let foundPost = results.first(where: { obj in obj.postID == post.id }), let numComments = post.commentsCount {
-            newPost.newCommentsCount = numComments - Int(foundPost.numComments)
-          }
-          
-          return newPost
-        })
-      }
-    }
-    
     await MainActor.run { [newPostsInBox] in
       withAnimation {
         Defaults[.postsInBox] = newPostsInBox

@@ -15,9 +15,9 @@ struct LightBoxElement: Identifiable, Equatable {
 }
 
 struct LightBoxElementView: View {
-  var el: ImgExtracted
+  var el: MediaExtracted
   var onTap: (()->())?
-  var doLiveText: Bool
+  @State var doLiveText: Bool
   @Binding var isPinching: Bool
   @State private var altSize: CGSize = .zero
   @Binding var isZoomed: Bool
@@ -27,7 +27,7 @@ struct LightBoxElementView: View {
       .scaledToFit()
     }
     .id("\(el.id)\(altSize.width + altSize.height)")
-    .frame(width: .screenW)
+    .frame(width: UIScreen.screenWidth)
     .preferredColorScheme(.dark)
     .edgesIgnoringSafeArea(.all)
     .statusBar(hidden: true)

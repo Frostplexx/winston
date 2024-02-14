@@ -8,66 +8,59 @@
 import SwiftUI
 import Defaults
 
-struct SubItemButton: View, Equatable {
-  static func == (lhs: SubItemButton, rhs: SubItemButton) -> Bool {
-    lhs.data == rhs.data
-  }
-  
-  var data: SubredditData
-  var action: () -> ()
+struct SubItemButton: View {
+  @Binding var selectedSub: FirstSelectable?
+  var sub: Subreddit
   var body: some View {
-    Button(action: action) {
+    if let data = sub.data {
+      Button {
+        selectedSub = .sub(sub)
+      } label: {
         HStack {
           Text(data.display_name ?? "")
-          SubredditIcon(subredditIconKit: data.subredditIconKit)
+          SubredditIcon(data: data)
         }
       }
+    }
   }
 }
 
-struct SubItem: View, Equatable {
-  static func == (lhs: SubItem, rhs: SubItem) -> Bool {
-    lhs.sub == rhs.sub && lhs.isActive == rhs.isActive
-  }
-  
-  var isActive: Bool
-  var selectSub: (Subreddit) -> ()
-  @ObservedObject var sub: Subreddit
-  var cachedSub: CachedSub
-//  @Default(.likedButNotSubbed) private var likedButNotSubbed
+struct SubItem: View {
+  var forcedMaskType: CommentBGSide = .middle
+  @Binding var selectedSub: FirstSelectable?
+  @StateObject var sub: Subreddit
+  var cachedSub: CachedSub? = nil
+  @Default(.likedButNotSubbed) private var likedButNotSubbed
   
   func favoriteToggle() {
-//    guard let sub = sub else { return }
-//    if likedButNotSubbed.contains(sub) {
-//      _ = sub.localFavoriteToggle()
-//    } else {
+    if likedButNotSubbed.contains(sub) {
+      _ = sub.localFavoriteToggle()
+    } else {
       sub.favoriteToggle(entity: cachedSub)
-//    }
+    }
   }
   
   var body: some View {
     if let data = sub.data {
-      let favorite = cachedSub.user_has_favorited
-//      let localFav = likedButNotSubbed.contains(sub)
-//      let isActive = selectedSub == .reddit(.subFeed(sub))
+      let favorite = cachedSub?.user_has_favorited ?? false
+      let localFav = likedButNotSubbed.contains(sub)
+      let isActive = selectedSub == .sub(sub)
       WListButton(showArrow: !IPAD, active: isActive) {
-        selectSub(sub)
+        selectedSub = .sub(sub)
       } label: {
         HStack {
-          Label {
-            Text(data.display_name ?? "")
-              .foregroundStyle(isActive ? .white : .primary)
-          } icon: {
-            SubredditIcon(subredditIconKit: data.subredditIconKit)
-          }
+          SubredditIcon(data: data)
+          Text(data.display_name ?? "")
+            .foregroundStyle(isActive ? .white : .primary)
           
           Spacer()
           
           Image(systemName: "star.fill")
-            .foregroundColor(favorite ? Color.accentColor : .gray.opacity(0.3))
+            .foregroundColor((favorite || localFav) ? Color.accentColor : .gray.opacity(0.3))
             .highPriorityGesture( TapGesture().onEnded(favoriteToggle) )
         }
       }
+      .mask(CommentBG(cornerRadius: 10, pos: forcedMaskType).fill(.black))
       
     } else {
       Text("Error")

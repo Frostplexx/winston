@@ -40,14 +40,13 @@ extension CachedSub {
     @NSManaged public var user_is_moderator: Bool
     @NSManaged public var user_is_subscriber: Bool
     @NSManaged public var uuid: String?
-    @NSManaged public var winstonCredentialID: UUID?
   
-  convenience init(data: SubredditData, context: NSManagedObjectContext, credentialID: UUID) {
+  convenience init(data: SubredditData, context: NSManagedObjectContext) {
     self.init(context: context)
-    update(data: data, credentialID: credentialID)
+    update(data: data)
   }
   
-  func update(data x: SubredditData, credentialID: UUID) {
+  func update(data x: SubredditData) {
     self.uuid = x.name
     self.allow_galleries = x.allow_galleries ?? false
     self.allow_images = x.allow_images ?? false
@@ -72,7 +71,6 @@ extension CachedSub {
     self.url = x.url
     self.user_flair_background_color = x.user_flair_background_color
     self.subscribers = Double(x.subscribers ?? 0)
-    self.winstonCredentialID = credentialID
   }
 
 }

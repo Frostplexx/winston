@@ -18,9 +18,7 @@ func resetApp() {
 }
 
 func resetCredentials() {
-  RedditCredentialsManager.shared.credentials.forEach { $0.delete() }
-  
-  let credentialsKeychain = Keychain(service: "lo.cafe.winston.reddit-credentials").synchronizable(Defaults[.BehaviorDefSettings].iCloudSyncCredentials)
+  let credentialsKeychain = Keychain(service: "lo.cafe.winston.reddit-credentials")
   
   credentialsKeychain["apiAppID"] = nil
   credentialsKeychain["apiAppSecret"] = nil
@@ -36,25 +34,23 @@ func resetCaches() {
   Caches.ytPlayers.cache.removeAll()
   Caches.postsAttrStr.cache.removeAll()
   Caches.postsPreviewModels.cache.removeAll()
-  Caches.avatars.cache.removeAll()
-  Caches.videos.cache.removeAll()
+  ThingEntityCache.shared.thingEntities.removeAll()
+  SharedVideoCache.shared.cache.removeAll()
+  AvatarCache.shared.data.removeAll()
 }
 
 func resetCoreData() {
   let container = PersistenceController.shared.container
   let entities = container.managedObjectModel.entities
   for entity in entities {
-        delete(entityName: entity.name!)
+    delete(entityName: entity.name!)
   }
   
   func delete(entityName: String) {
     let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
     let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
     do {
-      _ = try container.viewContext.performAndWait {
-        try container.viewContext.executeAndMergeChanges(deleteRequest)
-//        try container.viewContext.save()
-      }
+      try container.viewContext.execute(deleteRequest)
     } catch let error as NSError {
       debugPrint(error)
     }

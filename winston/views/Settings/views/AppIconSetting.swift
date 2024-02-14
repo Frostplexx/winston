@@ -38,19 +38,20 @@ struct AppIconSetting: View {
               
               //              Spacer()
               
-              if(icon == appIcon)
-              {
-                Image(systemName: "checkmark")
-                  .foregroundColor(.accentColor)
-              }
+                if(icon == appIcon)
+                {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                }
             }
           }
+          .themedListRowBG(enablePadding: true)
           .onTapGesture {
-            appIcon = icon
+              appIcon = icon
           }
         }
       }
-      .themedListSection()
+      .themedListDividers()
       
     }
     .themedListBG(theme.lists.bg)

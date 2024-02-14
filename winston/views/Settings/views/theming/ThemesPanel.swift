@@ -11,55 +11,56 @@ import Defaults
 import Zip
 
 struct ThemesPanel: View {
-  @Default(.ThemesDefSettings) private var themesDefSettings
+  @Default(.themesPresets) private var themesPresets
   @State private var isUnzipping = false
+  @EnvironmentObject private var routerProxy: RouterProxy
   @Environment(\.useTheme) private var theme
   var body: some View {
     List {
       
-      Group {
-        Section {
-          ThemeNavLink(theme: defaultTheme)
-            .deleteDisabled(true)
-          
-          ForEach(themesDefSettings.themesPresets) { theme in
-            if theme.id != "default" {
-              WListButton(showArrow: true) {
-                Nav.present(.editingTheme(theme))
-              } label: {
-                ThemeNavLink(theme: theme)
-              }
+      Section {
+        ThemeNavLink(theme: defaultTheme)
+          .themedListRowBG(enablePadding: true)
+          .deleteDisabled(true)
+        ForEach(themesPresets) { theme in
+          if theme.id != "default" {
+            WNavigationLink(value: theme) {
+              ThemeNavLink(theme: theme)
             }
           }
-          .onDelete { index in
-            withAnimation { themesDefSettings.themesPresets.remove(atOffsets: index) }
-          }
         }
-        
-        Section {
-          WSListButton("Import theme", icon: "doc.zipper") { isUnzipping = true }
-            .fileImporter(
-              isPresented: $isUnzipping,
-              allowedContentTypes: [UTType.zip],
-              allowsMultipleSelection: false
-            ) { res in
+        .onDelete { index in
+          withAnimation { themesPresets.remove(atOffsets: index) }
+        }
+      }
+      .themedListDividers()
+      
+      Section {
+        WSListButton("Import theme", icon: "doc.zipper") { isUnzipping = true }
+          .fileImporter(isPresented: $isUnzipping,
+                        allowedContentTypes: [UTType.zip],
+                        allowsMultipleSelection: false) { res in
+            do {
               switch res {
               case .success(let file):
-                _ = importTheme(at: file[0])
+                importTheme(at: file[0])
               case .failure(let error):
                 print(error.localizedDescription)
               }
+            } catch {
+              print("Failed to import file with error: \(error.localizedDescription)")
             }
-        }
+          }
       }
-      .themedListSection()
+      .themedListDividers()
+      
     }
     .themedListBG(theme.lists.bg)
     .overlay(
-      themesDefSettings.themesPresets.count > 1
+      themesPresets.count > 1
       ? nil
       : VStack(spacing: 0) {
-        Text("Start by duplicating the")
+        Text("Start duplicating the")
         HStack(spacing: 4) {
           Text("default theme by tapping")
           Image(systemName: "plus")
@@ -73,10 +74,14 @@ struct ThemesPanel: View {
     .toolbar {
       EditButton()
       Button {
-        withAnimation { themesDefSettings.themesPresets.append(defaultTheme.duplicate()) }
+        withAnimation { themesPresets.append(defaultTheme.duplicate()) }
       } label: {
         Image(systemName: "plus")
       }
+    }
+    .navigationDestination(for: WinstonTheme.self) { theme in
+      ThemeEditPanel(themeEditedInstance: ThemeEditedInstance(theme))
+        .environmentObject(routerProxy)
     }
   }
   
@@ -84,7 +89,8 @@ struct ThemesPanel: View {
 }
 
 struct ThemeNavLink: View {
-  @Default(.ThemesDefSettings) private var themesDefSettings
+  @Default(.selectedThemeID) private var selectedThemeID
+  @Default(.themesPresets) private var themesPresets
   @State private var restartAlert = false
   
   @Environment(\.useTheme) private var selectedTheme
@@ -143,19 +149,19 @@ struct ThemeNavLink: View {
       Spacer()
       
       Toggle("", isOn: Binding(get: { selectedTheme == theme  }, set: { _ in
-        if themesDefSettings.themesPresets.first(where: { $0.id == themesDefSettings.selectedThemeID })?.general != theme.general { restartAlert = true  }
-        themesDefSettings.selectedThemeID = theme.id
+        if themesPresets.first(where: { $0.id == selectedThemeID })?.general != theme.general { restartAlert = true  }
+        selectedThemeID = theme.id
       }))
       .highPriorityGesture(TapGesture())
     }
     .padding(.vertical, 2)
     .contextMenu {
       Button {
-        withAnimation { themesDefSettings.themesPresets.append(theme.duplicate()) }
+        withAnimation { themesPresets.append(theme.duplicate()) }
       } label: {
         Label("Duplicate", systemImage: "plus.square.on.square")
       }
-      
+
       Button(action: zipFiles) {
         Label("Export", systemImage: "doc.zipper")
       }

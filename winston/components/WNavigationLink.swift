@@ -12,8 +12,7 @@ struct WListButton<Content: View>: View {
   var active: Bool = false
   var action: () -> ()
   @ViewBuilder var label: (() -> Content)
-  @State private var forcedActive = false
-  @State private var uuid = UUID()
+  @EnvironmentObject private var routerProxy: RouterProxy
   
   init(showArrow: Bool = false, active: Bool = false, _ action: @escaping () -> (), @ViewBuilder label: @escaping () -> Content) {
     self.active = active
@@ -24,13 +23,7 @@ struct WListButton<Content: View>: View {
   
   var body: some View {
     Button {
-      forcedActive = true
-      doThisAfter(0) {
-        action()
-      }
-      doThisAfter(1) {
-        forcedActive = false
-      }
+      action()
     } label: {
       HStack {
         label()
@@ -44,12 +37,11 @@ struct WListButton<Content: View>: View {
             .foregroundColor(.primary)
         }
       }
+      .themedListRowBG(enablePadding: true, active: active)
       .contentShape(Rectangle())
     }
-    .themedListRow(active: forcedActive || active, isButton: !showArrow)
-    .onAppear { withAnimation { forcedActive = false } }
-//    .id("\(uuid.uuidString)-\(pressed ? "pressed" : "")")
-//    .themedListRowLikeBG(enablePadding: true, disableBG: true, active: active)
+    .buttonStyle(WNavLinkButtonStyle(active: active))
+    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
   }
 }
 
@@ -59,6 +51,7 @@ struct WSListButton: View {
   var action: () -> ()
   var label: String
   var icon: String? = nil
+  @EnvironmentObject private var routerProxy: RouterProxy
   
   init(showArrow: Bool = false, _ label: String, active: Bool = false, icon: String? = nil, _ action: @escaping () -> ()) {
     self.active = active
@@ -73,6 +66,11 @@ struct WSListButton: View {
       action()
     } label: {
       if let icon = icon {
+//        HStack {
+//          Image(systemName: icon)
+//            .foregroundStyle(Color.blue)
+//          Text(label)
+//        }
         Label(label, systemImage: icon)
       } else {
         Text(label)
@@ -83,17 +81,18 @@ struct WSListButton: View {
 }
 
 struct WNavigationLink<Content: View>: View {
-  var value: Router.NavDest
+  var value: any Hashable
   var active: Bool = false
   var label: (() -> Content)
+  @EnvironmentObject private var routerProxy: RouterProxy
   
-  init(_ value: Router.NavDest, active: Bool = false, _ label: @escaping () -> Content) {
+  init(_ value: any Hashable, active: Bool = false, _ label: @escaping () -> Content) {
     self.value = value
     self.active = active
     self.label = label
   }
   
-  init(value: Router.NavDest, active: Bool = false, _ label: @escaping () -> Content) {
+  init(value: any Hashable, active: Bool = false, _ label: @escaping () -> Content) {
     self.value = value
     self.active = active
     self.label = label
@@ -101,7 +100,7 @@ struct WNavigationLink<Content: View>: View {
   
   var body: some View {
     WListButton(showArrow: true, active: active) {
-      Nav.to(value)
+      routerProxy.router.path.append(value)
     } label: {
       label()
     }
@@ -109,39 +108,30 @@ struct WNavigationLink<Content: View>: View {
 }
 
 struct WSNavigationLink: View {
-  var value: Router.NavDest
+  var value: any Hashable
   var active: Bool = false
   var icon: String? = nil
   let label: String
+  @EnvironmentObject private var routerProxy: RouterProxy
   
-  init(_ value: Router.NavDest, active: Bool = false, _ label: String, icon: String? = nil) {
+  init(_ value: any Hashable, active: Bool = false, _ label: String, icon: String? = nil) {
     self.value = value
+    self.active = active
     self.active = active
     self.label = label
     self.icon = icon
   }
   var body: some View {
-    WListButton(showArrow: true, active: active) {
-      Nav.to(value)
-    } label: {
-      if let icon = icon {
-        Label(label, systemImage: icon)
-          .labelStyle(NormalLabelStyle())
-      } else {
-        Text(label)
-      }
+    WSListButton(showArrow: true, label, active: active, icon: icon) {
+      routerProxy.router.path.append(value)
     }
   }
 }
 
-
-struct NormalLabelStyle: LabelStyle {
-  func makeBody(configuration: Configuration) -> some View {
-    Label {
-      configuration.title.foregroundStyle(.primary)
-    } icon: {
-      configuration.icon.foregroundStyle(Color.accentColor)
-    }
-    .labelStyle(.automatic)
+struct WNavLinkButtonStyle: ButtonStyle {
+  var active = false
+  func makeBody(configuration: Self.Configuration) -> some View {
+    configuration.label
+      .overlay(Rectangle().fill(.primary.opacity(configuration.isPressed || (!IPAD && active) ? 0.1 : 0)).animation(.default.speed(2), value: active))
   }
 }

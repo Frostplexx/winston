@@ -7,28 +7,36 @@
 
 import SwiftUI
 import Defaults
-import NukeUI
 
 struct LightBoxOverlay: View {
-  let postTitle: String
-  let badgeKit: BadgeKit
-  let avatarImageRequest: ImageRequest?
+  var post: Post
   var opacity: CGFloat
-  var imagesArr: [ImgExtracted]
+  var imagesArr: [MediaExtracted]
   var activeIndex: Int
   @Binding var loading: Bool
   @Environment(\.dismiss) var dismiss
   @Binding var done: Bool
   @Environment(\.useTheme) private var selectedTheme
-    @State private var isPresentingShareSheet = false
+  @EnvironmentObject private var routerProxy: RouterProxy
+  
+  @State private var isPresentingShareSheet = false
   @State private var sharedImageData: Data?
+  
   var body: some View {
     VStack(alignment: .leading) {
       VStack(alignment: .leading, spacing: 8) {
-        Text(postTitle)
-          .fontSize(20, .semibold)
-          .allowsHitTesting(false)
-        BadgeView(avatarRequest: avatarImageRequest, saved: false, usernameColor: nil, author: badgeKit.author, fullname: badgeKit.authorFullname, userFlair: badgeKit.userFlair, created: badgeKit.created, avatarURL: nil, theme: selectedTheme.postLinks.theme.badge)
+        if let title = post.data?.title {
+          Text(title)
+            .fontSize(20, .semibold)
+            .allowsHitTesting(false)
+        }
+        
+        Badge(post: post,usernameColor: .primary, theme: selectedTheme.postLinks.theme.badge)
+          .equatable()
+          .foregroundColor(.primary)
+          .id("post-badge")
+          .listRowInsets(EdgeInsets(top: 6, leading: 8, bottom: 8, trailing: 8))
+      
       }
       
       Spacer()
@@ -45,15 +53,12 @@ struct LightBoxOverlay: View {
       
       HStack(spacing: 12) {
         
-          // MANDRAKE
-//           if let post {
-//               LightBoxButton(icon: "bubble.right") {
-//             if let data = post.data {
-//                   Nav.to(.reddit(.post(Post(id: post.id, subID: data.subreddit))))
-//                   dismiss()
-//                 }
-//               }
-//           }
+        LightBoxButton(icon: "bubble.right") {
+          if let data = post.data {
+            routerProxy.router.path.append(PostViewPayload(post: Post(id: post.id, api: post.redditAPI), sub: Subreddit(id: data.subreddit, api: post.redditAPI)))
+            dismiss()
+          }
+        }
         
         
         LightBoxButton(icon: "square.and.arrow.down") {
@@ -77,6 +82,10 @@ struct LightBoxOverlay: View {
           if let sharedImageData = sharedImageData, let uiimg = UIImage(data: sharedImageData){
             let image = ShareImage(placeholderItem: uiimg)
             ShareSheet(items: [image])
+              .onAppear{
+                print("Share sheet")
+                print(image)
+              }
           }
         }
       }

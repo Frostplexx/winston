@@ -11,25 +11,20 @@ import Defaults
 import SwiftUI
 
 
-typealias Subreddit = GenericRedditEntity<SubredditData, SubredditWinstonData>
+typealias Subreddit = GenericRedditEntity<SubredditData, AnyHashable>
 
 extension Subreddit {
   static var prefix = "t5"
-  var selfPrefix: String { Self.prefix }
-  
-  convenience init(data: T) {
-    self.init(data: data, typePrefix: "\(Subreddit.prefix)_")
-    self.winstonData = SubredditWinstonData()
+  convenience init(data: T, api: RedditAPI) {
+    self.init(data: data, api: api, typePrefix: "\(Subreddit.prefix)_")
   }
   
-  convenience init(id: String) {
-    self.init(id: id, typePrefix: "\(Subreddit.prefix)_")
-    self.winstonData = SubredditWinstonData()
+  convenience init(id: String, api: RedditAPI) {
+    self.init(id: id, api: api, typePrefix: "\(Subreddit.prefix)_")
   }
   
-  convenience init(entity: CachedSub) {
-    self.init(id: entity.uuid ?? UUID().uuidString, typePrefix: "\(Subreddit.prefix)_")
-    self.winstonData = SubredditWinstonData()
+  convenience init(entity: CachedSub, api: RedditAPI) {
+    self.init(id: entity.uuid ?? UUID().uuidString, api: api, typePrefix: "\(Subreddit.prefix)_")
     self.data = SubredditData(entity: entity)
   }
   
@@ -74,16 +69,15 @@ extension Subreddit {
     }
   }
   
+  
+  
   func subscribeToggle(optimistic: Bool = false, _ cb: (()->())? = nil) {
-    guard let currentCredentialID = RedditCredentialsManager.shared.selectedCredential?.id else { return }
-
     let context = PersistenceController.shared.container.viewContext
     
     if let data = data {
       @Sendable func doToggle() {
-        let fetchRequest = NSFetchRequest<CachedSub>(entityName: "CachedSub")
-        fetchRequest.predicate = NSPredicate(format: "winstonCredentialID == %@", currentCredentialID as CVarArg)
-        guard let results = (context.performAndWait { return try? context.fetch(fetchRequest) }) else { return }
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "CachedSub")
+        guard let results = (context.performAndWait { return try? context.fetch(fetchRequest) as? [CachedSub] }) else { return }
         let foundSub = context.performAndWait { results.first(where: { $0.name == self.data?.name }) }
         
         withAnimation {
@@ -93,7 +87,7 @@ extension Subreddit {
           context.delete(foundSub)
         } else if let newData = self.data {
           context.performAndWait {
-            _ = CachedSub(data: newData, context: context, credentialID: currentCredentialID)
+            _ = CachedSub(data: newData, context: context)
           }
         }
       }
@@ -125,13 +119,10 @@ extension Subreddit {
   }
   
   func getFlairs() async -> [Flair]? {
-    if self.data?.winstonFlairs != nil { return self.data?.winstonFlairs }
-    
     if let data = (await RedditAPI.shared.getFlairs(data?.display_name ?? id)) {
-      _ = await MainActor.run {
+      await MainActor.run {
         withAnimation {
           self.data?.winstonFlairs = data
-          return data
         }
       }
     }
@@ -148,23 +139,6 @@ extension Subreddit {
     }
   }
   
-  func loadFlairs(_ callback: (([FilterData]) -> ())? = nil) {
-    let context = PersistenceController.shared.container.newBackgroundContext()
-    let fetchRequest = NSFetchRequest<CachedFilter>(entityName: "CachedFilter")
-    fetchRequest.predicate = NSPredicate(format: "subreddit_id == %@", id)
-    
-    context.performAndWait {
-      let prevSubFlairs = (try? context.fetch(fetchRequest)) ?? []
-      let flairFilters = prevSubFlairs.map({ FilterData.from($0) })
-      DispatchQueue.main.async {
-        withAnimation {
-          self.winstonData?.flairs = flairFilters
-          callback?(flairFilters)
-        }
-      }
-    }
-  }
-  
   func fetchRules() async -> RedditAPI.FetchSubRulesResponse? {
     if let data = await RedditAPI.shared.fetchSubRules(data?.display_name ?? id) {
       return data
@@ -172,83 +146,17 @@ extension Subreddit {
     return nil
   }
   
-  func fetchPosts(sort: SubListingSortOption = .best, after: String? = nil, searchText: String? = nil, contentWidth: CGFloat = .screenW) async -> ([Post]?, String?)? {
+  func fetchPosts(sort: SubListingSortOption = .best, after: String? = nil, searchText: String? = nil, contentWidth: CGFloat = UIScreen.screenWidth) async -> ([Post]?, String?)? {
     if let response = await RedditAPI.shared.fetchSubPosts(data?.url ?? (id == "home" ? "" : id), sort: sort, after: after, searchText: searchText), let data = response.0 {
-      return (Post.initMultiple(datas: data.compactMap { $0.data }, sub: self, contentWidth: contentWidth), response.1)
-    }
-    
-    return nil
-  }
-  
-  func fetchSavedMixedMedia(after: String? = nil, searchText: String? = nil, contentWidth: CGFloat = .screenW) async -> [Either<Post, Comment>]? {
-    // saved feed is a mix of posts and comments - logic needs to be handled separately
-    if let savedMediaData = await RedditAPI.shared.fetchSavedPosts("saved", after: after, searchText: searchText) {
-      await MainActor.run {
-        self.loading = false
-      }
-      
-      var comments: [Comment] = []
-      
-      let selectedTheme = getEnabledTheme()
-      
-      let returnData: [Either<Post, Comment>]? = savedMediaData.map {
-        switch $0 {
-        case .first(let postData):
-          return .first(Post(data: postData, sub: self))
-        case .second(let commentData):
-          let comment = Comment(data: commentData)
-          comments.append(comment)
-          return .second(comment)
-        }
-      }
-      
-      Task(priority: .background) { [comments] in
-        _ = await RedditAPI.shared.updateCommentsWithAvatar(comments: comments, avatarSize: selectedTheme.comments.theme.badge.avatar.size)
-      }
-      
-      return returnData
+      return (Post.initMultiple(datas: data.compactMap { $0.data }, api: RedditAPI.shared, contentWidth: contentWidth), response.1)
     }
     return nil
-  }
-  
-  func resetFlairs() {
-    let context = PersistenceController.shared.container.newBackgroundContext()
-
-    let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "CachedFilter")
-    fetchRequest.predicate = NSPredicate(format: "subreddit_id == %@ && type == 'flair'", self.id)
-    
-    let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-    deleteRequest.resultType = .resultTypeObjectIDs
-
-    do {
-      // Perform the batch delete
-      try context.performAndWait {
-        let batchDelete = try context.execute(deleteRequest) as? NSBatchDeleteResult
-        
-        guard let deleteResult = batchDelete?.result as? [NSManagedObjectID] else { return }
-        let deletedObjects: [AnyHashable: Any] = [ NSDeletedObjectsKey: deleteResult ]
-        
-        NSManagedObjectContext.mergeChanges(fromRemoteContextSave: deletedObjects, into: [context])
-      }
-    } catch {
-      print("Error resetting flairs for \(self.id)")
-    }
   }
 }
 
 //struct SubredditData: GenericRedditEntityDataType, _DefaultsSerializable {
 //
 //}
-
-class SubredditWinstonData: Hashable, ObservableObject {
-  static func == (lhs: SubredditWinstonData, rhs: SubredditWinstonData) -> Bool { lhs.flairs == rhs.flairs }
-  
-  @Published var flairs: [FilterData] = []
-  
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(flairs)
-  }
-}
 
 struct SubredditData: Codable, GenericRedditEntityDataType, Defaults.Serializable, Identifiable {
   var user_flair_background_color: String? = nil
@@ -274,7 +182,7 @@ struct SubredditData: Codable, GenericRedditEntityDataType, Defaults.Serializabl
   var name: String
   var quarantine: Bool? = nil
   var hide_ads: Bool? = nil
-  var prediction_leaderboard_entry_type: Double? = nil
+  var prediction_leaderboard_entry_type: String? = nil
   var emojis_enabled: Bool? = nil
   var advertiser_category: String? = nil
   var public_description: String
@@ -356,116 +264,11 @@ struct SubredditData: Codable, GenericRedditEntityDataType, Defaults.Serializabl
   //  let mobile_banner_image: String?
   //  let allow_predictions_tournament: Bool?
   
-  var subredditIconKit: SubredditIconKit {
-    let communityIconArr = community_icon?.split(separator: "?") ?? []
-    let iconRaw = icon_img == "" || icon_img == nil ? communityIconArr.count > 0 ? String(communityIconArr[0]) : "" : icon_img
-    let name = display_name ?? ""
-    let iconURLStr = iconRaw == "" ? nil : iconRaw
-    let color = firstNonEmptyString(key_color, primary_color, "#828282") ?? ""
-    
-    return SubredditIconKit(url: iconURLStr, initialLetter: String((name).prefix(1)).uppercased(), color: String((firstNonEmptyString(color, "#828282") ?? "").dropFirst(1)))
-  }
-  
   
   enum CodingKeys: String, CodingKey {
     case user_flair_background_color, submit_text_html, restrict_posting, user_is_banned, free_form_reports, wiki_enabled, user_is_muted, user_can_flair_in_sr, display_name, header_img, title, allow_galleries, icon_size, primary_color, active_user_count, icon_img, display_name_prefixed, accounts_active, public_traffic, subscribers, name, quarantine, hide_ads, prediction_leaderboard_entry_type, emojis_enabled, advertiser_category, public_description, comment_score_hide_mins, allow_predictions, user_has_favorited, user_flair_template_id, community_icon, banner_background_image, original_content_tag_enabled, community_reviewed, submit_text, description_html, spoilers_enabled, allow_talks, is_enrolled_in_new_modmail, key_color, can_assign_user_flair, created, show_media_preview, user_is_subscriber, allow_videogifs, should_archive_posts, user_flair_type, allow_polls, public_description_html, allow_videos, banner_img, user_flair_text, banner_background_color, show_media, id, user_is_moderator, description, is_chat_post_feature_enabled, submit_link_label, user_flair_text_color, restrict_commenting, user_flair_css_class, allow_images, url, created_utc, user_is_contributor, winstonFlairs, subreddit_type, over18
   }
   
-  init(id: String) {
-    self.user_flair_background_color = nil
-    self.submit_text_html = nil
-    self.restrict_posting = nil
-    self.user_is_banned = nil
-    self.free_form_reports = nil
-    self.wiki_enabled = nil
-    self.user_is_muted = nil
-    self.user_can_flair_in_sr = nil
-    self.display_name = nil
-    self.header_img = nil
-    self.title = nil
-    self.allow_galleries = nil
-    self.icon_size = nil
-    self.primary_color = nil
-    self.active_user_count = nil
-    self.icon_img = nil
-    self.display_name_prefixed = nil
-    self.accounts_active = nil
-    self.public_traffic = nil
-    self.subscribers = nil
-    self.quarantine = nil
-    self.hide_ads = nil
-    self.prediction_leaderboard_entry_type = nil
-    self.emojis_enabled = nil
-    self.advertiser_category = nil
-    self.comment_score_hide_mins = nil
-    self.allow_predictions = nil
-    self.user_has_favorited = nil
-    self.user_flair_template_id = nil
-    self.community_icon = nil
-    self.banner_background_image = nil
-    self.original_content_tag_enabled = nil
-    self.community_reviewed = nil
-    self.over18 = nil
-    self.submit_text = nil
-    self.description_html = nil
-    self.spoilers_enabled = nil
-    self.allow_talks = nil
-    self.is_enrolled_in_new_modmail = nil
-    self.key_color = nil
-    self.can_assign_user_flair = nil
-    self.created = nil
-    self.show_media_preview = nil
-    self.user_is_subscriber = nil
-    self.allow_videogifs = nil
-    self.should_archive_posts = nil
-    self.user_flair_type = nil
-    self.allow_polls = nil
-    self.public_description = ""
-    self.public_description_html = nil
-    self.allow_videos = nil
-    self.banner_img = nil
-    self.user_flair_text = nil
-    self.banner_background_color = nil
-    self.show_media = nil
-    self.user_is_moderator = nil
-    self.description = nil
-    self.is_chat_post_feature_enabled = nil
-    self.submit_link_label = nil
-    self.user_flair_text_color = nil
-    self.restrict_commenting = nil
-    self.user_flair_css_class = nil
-    self.allow_images = nil
-    self.subreddit_type = "public"
-    self.created_utc = nil
-    self.user_is_contributor = nil
-    self.winstonFlairs = nil
-    self.title = nil
-    
-    self.allow_galleries = nil
-    self.allow_images = nil
-    self.allow_videos = nil
-    self.over18 = nil
-    self.restrict_commenting = nil
-    self.user_has_favorited = nil
-    self.user_is_banned = nil
-    self.user_is_moderator = nil
-    self.user_is_subscriber = nil
-    self.banner_background_color = nil
-    self.banner_background_image = nil
-    self.banner_img = nil
-    self.community_icon = nil
-    self.display_name = nil
-    self.header_img = nil
-    self.icon_img = nil
-    self.key_color =  nil
-    self.name = id
-    self.primary_color = nil
-    self.title = id
-    self.url = ""
-    self.user_flair_background_color = nil
-    self.id = id
-    self.subscribers = 0
-  }
   
   init(entity: CachedSub) {
     self.user_flair_background_color = nil
@@ -608,7 +411,7 @@ struct SubredditData: Codable, GenericRedditEntityDataType, Defaults.Serializabl
     self.name = try container.decode(String.self, forKey: .name)
     self.quarantine = try container.decodeIfPresent(Bool.self, forKey: .quarantine)
     self.hide_ads = try container.decodeIfPresent(Bool.self, forKey: .hide_ads)
-    self.prediction_leaderboard_entry_type = try container.decodeIfPresent(Double.self, forKey: .prediction_leaderboard_entry_type)
+    self.prediction_leaderboard_entry_type = try container.decodeIfPresent(String.self, forKey: .prediction_leaderboard_entry_type)
     self.emojis_enabled = try container.decodeIfPresent(Bool.self, forKey: .emojis_enabled)
     self.advertiser_category = try container.decodeIfPresent(String.self, forKey: .advertiser_category)
     self.public_description = try container.decode(String.self, forKey: .public_description)

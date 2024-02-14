@@ -5,37 +5,28 @@
 //  Created by Igor Marcossi on 28/06/23.
 //
 
-import SwiftUI
 import Foundation
 
 typealias User = GenericRedditEntity<UserData, AnyHashable>
 
 extension User {
   static var prefix = "t2"
-  var selfPrefix: String { Self.prefix }
   
-  convenience init(data: T) {
-    self.init(data: data, typePrefix: "\(User.prefix)_")
+  convenience init(data: T, api: RedditAPI) {
+    self.init(data: data, api: api, typePrefix: "\(User.prefix)_")
   }
-  convenience init(id: String) {
-    self.init(id: id, typePrefix: "\(User.prefix)_")
+  convenience init(id: String, api: RedditAPI) {
+    self.init(id: id, api: api, typePrefix: "\(User.prefix)_")
   }
   
-  func refetchOverview(_ dataTypeFilter: String? = nil, _ after: String? = nil) async -> [Either<Post, Comment>]? {
-    if let name = data?.name, let overviewData = await RedditAPI.shared.fetchUserOverview(name, dataTypeFilter, after) {
-      await MainActor.run {
-        self.loading = false
-      }
-      
-      return overviewData.map {
-        switch $0 {
-        case .first(let postData):
-          return .first(Post(data: postData))
-        case .second(let commentData):
-          return .second(Comment(data: commentData))
+  func refetchOverview(_ after: String? = nil) async -> [Either<PostData, CommentData>]? {
+    if let name = data?.name, let overviewData = await RedditAPI.shared.fetchUserOverview(name, after) {
+        await MainActor.run {
+          self.loading = false
         }
+        return overviewData
       }
-    }
+
     return nil
   }
   
@@ -54,15 +45,7 @@ extension User {
     }
   }
   
-  func fetchItself() {
-    Task(priority: .background) {
-      if let data = await RedditAPI.shared.fetchUser(id) {
-        await MainActor.run { withAnimation {
-          self.data = data
-        } }
-      }
-    }
-  }
+  
 }
 
 struct UserData: GenericRedditEntityDataType {

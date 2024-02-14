@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct GeneralTheme: Codable, Hashable, Equatable {
+struct GeneralTheme: Codable, Hashable {
   var navPanelBG: ThemeForegroundBG
   var tabBarBG: ThemeForegroundBG
   var floatingPanelsBG: ThemeForegroundBG

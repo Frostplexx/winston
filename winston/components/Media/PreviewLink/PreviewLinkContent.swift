@@ -7,14 +7,12 @@
 
 import Foundation
 import SwiftUI
-import UIKit
 import NukeUI
 import OpenGraph
 import SkeletonUI
 import YouTubePlayerKit
 import Defaults
 import Combine
-import SafariServices
 
 struct PreviewLinkContent: View {
   var compact: Bool
@@ -22,16 +20,18 @@ struct PreviewLinkContent: View {
   var url: URL
   static let height: CGFloat = 88
   @Environment(\.openURL) private var openURL
-  @Default(.BehaviorDefSettings) private var behaviorDefSettings
+  @EnvironmentObject private var routerProxy: RouterProxy
+  @ObservedObject private var tempGlobalState = TempGlobalState.shared
+  @Default(.openLinksInSafari) private var openLinksInSafari
   var body: some View {
-    PreviewLinkContentRaw(compact: compact, image: viewModel.image, title: viewModel.title, description: viewModel.description, loading: viewModel.loading, url: url, openURL: openURL)
+    PreviewLinkContentRaw(compact: compact, image: viewModel.image, title: viewModel.title, description: viewModel.description, loading: viewModel.loading, url: url, openURL: openURL, routerProxy: routerProxy, globalURL: $tempGlobalState.inAppBrowserURL, openLinksInSafari: openLinksInSafari)
   }
 }
 
 
 struct PreviewLinkContentRaw: View, Equatable {
   static func == (lhs: PreviewLinkContentRaw, rhs: PreviewLinkContentRaw) -> Bool {
-    lhs.image == rhs.image && lhs.title == rhs.title && lhs.compact == rhs.compact && lhs.description == rhs.description && lhs.loading == rhs.loading && lhs.url == rhs.url
+    lhs.image == rhs.image && lhs.title == rhs.title && lhs.compact == rhs.compact && lhs.description == rhs.description && lhs.loading == rhs.loading && lhs.url == rhs.url && lhs.openLinksInSafari == rhs.openLinksInSafari
   }
   
   static let height: CGFloat = 88
@@ -42,7 +42,10 @@ struct PreviewLinkContentRaw: View, Equatable {
   var loading: Bool
   var url: URL
   var openURL: OpenURLAction
-    
+  var routerProxy: RouterProxy
+  @Binding var globalURL: URL?
+  var openLinksInSafari: Bool
+  
   var body: some View {
     HStack(spacing: 16) {
       
@@ -53,11 +56,13 @@ struct PreviewLinkContentRaw: View, Equatable {
               .fontSize(17, .medium)
               .lineLimit(1)
               .truncationMode(.tail)
+              .fixedSize(horizontal: false, vertical: true)
             
             Text(cleanURL(url: url))
               .fontSize(13)
               .opacity(0.5)
               .lineLimit(1)
+              .fixedSize(horizontal: false, vertical: true)
           }
           .frame(maxWidth: .infinity, alignment: .leading)
           
@@ -65,7 +70,10 @@ struct PreviewLinkContentRaw: View, Equatable {
             .fontSize(14)
             .lineLimit(2)
             .opacity(0.75)
+            .fixedSize(horizontal: false, vertical: true)
         }
+//        .skeleton(with: viewModel.loading)
+//        .multiline(lines: 4, scales: [1: 1, 2: 0.5, 3: 0.75, 4: 0.75])
         .frame(maxWidth: .infinity, alignment: .leading)
         .multilineTextAlignment(.leading)
       }
@@ -86,13 +94,13 @@ struct PreviewLinkContentRaw: View, Equatable {
       .frame(width:  compact ? scaledCompactModeThumbSize() : 76, height:  compact ? scaledCompactModeThumbSize() : 76)
       .clipped()
       .mask(RR(12, Color.black))
-      .background(RR(12, Color.primary.opacity(0.1)))
+      .background(RR(12, Color.primary.opacity(0.05)))
     }
     .padding(.vertical, compact ? 0 : 6)
     .padding(.leading, compact ? 0 : 10)
     .padding(.trailing, compact ? 0 : 6)
     .frame(maxWidth: compact ? nil : .infinity, minHeight: compact ? nil : PreviewLinkContent.height, maxHeight: compact ? nil : PreviewLinkContent.height)
-    .background(compact ? nil : RR(16, Color.primary.opacity(0.1)))
+    .background(compact ? nil : RR(16, Color.primary.opacity(0.05)))
     .contextMenu {
       Button {
         UIPasteboard.general.string = url.absoluteString
@@ -102,7 +110,11 @@ struct PreviewLinkContentRaw: View, Equatable {
     }
     .highPriorityGesture(TapGesture().onEnded {
       if let newURL = URL(string: url.absoluteString.replacingOccurrences(of: "https://reddit.com/", with: "winstonapp://")) {
-        Nav.openURL(newURL)
+        if openLinksInSafari {
+          openURL(newURL)
+        } else {
+          globalURL = newURL
+        }
       }
     })
   }

@@ -1,6 +1,1 @@
-# Fixed
-
-- Winston doesn't crash on iOS 16.X anymore
-- Fix some other potential instances where the app could crash
-- Fix "Show Upvote Ratio" option
-
+- Performance improvements

@@ -11,27 +11,12 @@ import Defaults
 
 extension RedditAPI {
   func searchInSubreddit(_ subreddit: String, _ query: String) async -> [UserData]? {
-    await refreshToken()
-    //    await getModHash()
-    if let headers = self.getRequestHeaders() {
-      let limit = Defaults[.feedPostsLoadLimit]
-      let params = SearchInSubredditPayload(limit: limit, q: query)
-      let response = await AF.request(
-        "\(RedditAPI.redditApiURLBase)/r/\(subreddit)/search",
-        method: .get,
-        parameters: params,
-        encoder: URLEncodedFormParameterEncoder(destination: .queryString),
-        headers: headers
-      )
-        .serializingDecodable(Listing<UserData>.self).result
-      switch response {
-      case .success(let data):
-        return data.data?.children?.compactMap { $0.data }
-      case .failure(let error):
-        Oops.shared.sendError(error)
-        return nil
-      }
-    } else {
+    let limit = Defaults[.SubredditFeedDefSettings].chunkLoadSize
+    let params = SearchInSubredditPayload(limit: limit, q: query)
+    switch await self.doRequest("\(RedditAPI.redditApiURLBase)/r/\(subreddit)/search", method: .get, params: params, paramsLocation: .queryString, decodable: Listing<UserData>.self)  {
+    case .success(let data):
+      return data.data?.children?.compactMap { $0.data }
+    case .failure(_):
       return nil
     }
   }
@@ -49,6 +34,7 @@ extension RedditAPI {
     var sort: SearchInSubredditSort = .relevance
     var type: String = "sr,link,user"
     var category: String = ""
+    var raw_json = 1
   }
   
   enum SearchInSubredditSort: String, Codable {

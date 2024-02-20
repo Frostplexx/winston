@@ -58,7 +58,7 @@
 		BB978B3C2B4F3BE200BE90D1 /* MDEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB978B382B4F3BE200BE90D1 /* MDEditor.swift */; };
 		BB978B432B4F756400BE90D1 /* External to Internal Links.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB978B422B4F756400BE90D1 /* External to Internal Links.swift */; };
 		BB978B452B4FA4A500BE90D1 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB978B442B4FA4A500BE90D1 /* ImageView.swift */; };
-		BBD6E9D72B50F37200901C1C /* Quirky Msg Util.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6E9D62B50F37200901C1C /* Quirky Msg Util.swift */; };
+		BBD6E9D72B50F37200901C1C /* QuirkyMsgUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6E9D62B50F37200901C1C /* QuirkyMsgUtil.swift */; };
 		BBD6E9D92B50F53000901C1C /* CommentSkipper.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6E9D82B50F53000901C1C /* CommentSkipper.swift */; };
 		BBD6E9DB2B50F5D300901C1C /* Comment util.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBD6E9DA2B50F5D300901C1C /* Comment util.swift */; };
 		BBD6E9DE2B51B03600901C1C /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = BBD6E9DD2B51B03600901C1C /* MarkdownUI */; };
@@ -351,6 +351,7 @@
 		EC8B814B2AC9546C000DC827 /* frame.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8B814A2AC9546C000DC827 /* frame.swift */; };
 		EC8B814E2AC9650E000DC827 /* AddingStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8B814D2AC9650E000DC827 /* AddingStrings.swift */; };
 		EC8C707B2B4E4EB7004DBA75 /* ImageProcessors+ScaleFixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8C707A2B4E4EB7004DBA75 /* ImageProcessors+ScaleFixer.swift */; };
+		EC8EF5A32B608F63009E51D2 /* ThemeColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8EF5A22B608F63009E51D2 /* ThemeColor.swift */; };
 		EC8F34662A6A348F00EB8249 /* SwipeActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8F34652A6A348F00EB8249 /* SwipeActions.swift */; };
 		EC8F34792A6CE79B00EB8249 /* PostInBoxLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8F34782A6CE79B00EB8249 /* PostInBoxLink.swift */; };
 		EC8F347C2A6CEBD600EB8249 /* winston.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = EC8F347A2A6CEBD600EB8249 /* winston.xcdatamodeld */; };
@@ -420,6 +421,7 @@
 		ECAEFF6B2A77DE490052FCD3 /* emojiCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAEFF6A2A77DE490052FCD3 /* emojiCodes.swift */; };
 		ECAEFF6D2A77E8CA0052FCD3 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAEFF6C2A77E8CA0052FCD3 /* Onboarding.swift */; };
 		ECB03BFB2AEC2D090090674A /* AltImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB03BFA2AEC2D090090674A /* AltImage.swift */; };
+		ECB0D46E2B5ED1DE00F90B9B /* SwiftyUI in Frameworks */ = {isa = PBXBuildFile; productRef = ECB0D46D2B5ED1DE00F90B9B /* SwiftyUI */; };
 		ECB155122B25A18D0069CA2C /* BigInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB155112B25A18D0069CA2C /* BigInput.swift */; };
 		ECB155142B25A1B60069CA2C /* BigInfoCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB155132B25A1B60069CA2C /* BigInfoCredential.swift */; };
 		ECB155182B25A1E30069CA2C /* NiceCredentialSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB155172B25A1E30069CA2C /* NiceCredentialSection.swift */; };
@@ -438,8 +440,8 @@
 		ECC38B672B18729D00609C87 /* maxRelative.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC38B662B18729D00609C87 /* maxRelative.swift */; };
 		ECC68D492A7A9136005BC7B4 /* WDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC68D482A7A9136005BC7B4 /* WDivider.swift */; };
 		ECC68D4B2A7A9554005BC7B4 /* nsfw.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC68D4A2A7A9554005BC7B4 /* nsfw.swift */; };
+		ECCB11812B5E19B7009881BE /* SilentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECCB11802B5E19B7009881BE /* SilentState.swift */; };
 		ECD1DAE62B29747800AB4917 /* refetchMeListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD1DAE52B29747800AB4917 /* refetchMeListener.swift */; };
-		ECD1FC072A56D46D00723016 /* ObservableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD1FC062A56D46D00723016 /* ObservableArray.swift */; };
 		ECD1FC092A570B4F00723016 /* PostFloatingPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD1FC082A570B4F00723016 /* PostFloatingPill.swift */; };
 		ECD2A3772A69C26900EDD02D /* consts.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD2A3762A69C26900EDD02D /* consts.swift */; };
 		ECD2B7192B3D2CF0008E2663 /* FloatingMainTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD2B7182B3D2CF0008E2663 /* FloatingMainTrigger.swift */; };
@@ -628,7 +630,7 @@
 		BB978B382B4F3BE200BE90D1 /* MDEditor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDEditor.swift; sourceTree = "<group>"; };
 		BB978B422B4F756400BE90D1 /* External to Internal Links.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "External to Internal Links.swift"; path = "winston/components/Markdown Handling/External to Internal Links.swift"; sourceTree = SOURCE_ROOT; };
 		BB978B442B4FA4A500BE90D1 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageView.swift; path = winston/components/Media/ImageView.swift; sourceTree = SOURCE_ROOT; };
-		BBD6E9D62B50F37200901C1C /* Quirky Msg Util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Quirky Msg Util.swift"; path = "winston/components/Quirky Msg Util.swift"; sourceTree = SOURCE_ROOT; };
+		BBD6E9D62B50F37200901C1C /* QuirkyMsgUtil.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = QuirkyMsgUtil.swift; path = winston/components/QuirkyMsgUtil.swift; sourceTree = SOURCE_ROOT; };
 		BBD6E9D82B50F53000901C1C /* CommentSkipper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommentSkipper.swift; sourceTree = "<group>"; };
 		BBD6E9DA2B50F5D300901C1C /* Comment util.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Comment util.swift"; path = "winston/utils/Comment util.swift"; sourceTree = SOURCE_ROOT; };
 		BBD6E9DF2B51B45D00901C1C /* Winston MD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Winston MD.swift"; path = "winston/components/Markdown Handling/Winston MD.swift"; sourceTree = SOURCE_ROOT; };
@@ -915,6 +917,7 @@
 		EC8B814A2AC9546C000DC827 /* frame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = frame.swift; sourceTree = "<group>"; };
 		EC8B814D2AC9650E000DC827 /* AddingStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddingStrings.swift; sourceTree = "<group>"; };
 		EC8C707A2B4E4EB7004DBA75 /* ImageProcessors+ScaleFixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageProcessors+ScaleFixer.swift"; sourceTree = "<group>"; };
+		EC8EF5A22B608F63009E51D2 /* ThemeColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeColor.swift; sourceTree = "<group>"; };
 		EC8F34652A6A348F00EB8249 /* SwipeActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeActions.swift; sourceTree = "<group>"; };
 		EC8F34782A6CE79B00EB8249 /* PostInBoxLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostInBoxLink.swift; sourceTree = "<group>"; };
 		EC8F347B2A6CEBD600EB8249 /* winston.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = winston.xcdatamodel; sourceTree = "<group>"; };
@@ -995,8 +998,8 @@
 		ECC38B662B18729D00609C87 /* maxRelative.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = maxRelative.swift; sourceTree = "<group>"; };
 		ECC68D482A7A9136005BC7B4 /* WDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WDivider.swift; sourceTree = "<group>"; };
 		ECC68D4A2A7A9554005BC7B4 /* nsfw.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nsfw.swift; sourceTree = "<group>"; };
+		ECCB11802B5E19B7009881BE /* SilentState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SilentState.swift; sourceTree = "<group>"; };
 		ECD1DAE52B29747800AB4917 /* refetchMeListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = refetchMeListener.swift; sourceTree = "<group>"; };
-		ECD1FC062A56D46D00723016 /* ObservableArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableArray.swift; sourceTree = "<group>"; };
 		ECD1FC082A570B4F00723016 /* PostFloatingPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostFloatingPill.swift; sourceTree = "<group>"; };
 		ECD2A3762A69C26900EDD02D /* consts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = consts.swift; sourceTree = "<group>"; };
 		ECD2B7182B3D2CF0008E2663 /* FloatingMainTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingMainTrigger.swift; sourceTree = "<group>"; };
@@ -1132,6 +1135,7 @@
 				EC9BB1C02A8B05AA0070CD97 /* Nuke in Frameworks */,
 				EC2D72B32AC5335E002601E0 /* CHTCollectionViewWaterfallLayout in Frameworks */,
 				ECDD515F2A748C5800FD9498 /* OpenGraph in Frameworks */,
+				ECB0D46E2B5ED1DE00F90B9B /* SwiftyUI in Frameworks */,
 				EC6650EA2AB7E21E006B83A4 /* Zip in Frameworks */,
 				ECDD51622A748DF600FD9498 /* SkeletonUI in Frameworks */,
 				6514FFEC2AFD01520051D264 /* WhatsNewKit in Frameworks */,
@@ -1526,9 +1530,9 @@
 		EC4C7CB02B2DA1D70007A4DA /* FloatingFeedMenu */ = {
 			isa = PBXGroup;
 			children = (
-				EC4C7CB12B2DA2030007A4DA /* FloatingFeedMenu.swift */,
 				EC320A292B3D26E500BD5FC4 /* FloatingBGBlur.swift */,
 				ECD2B7182B3D2CF0008E2663 /* FloatingMainTrigger.swift */,
+				EC4C7CB12B2DA2030007A4DA /* FloatingFeedMenu.swift */,
 			);
 			path = FloatingFeedMenu;
 			sourceTree = "<group>";
@@ -1576,6 +1580,7 @@
 		EC593AD62A4673B2002D6454 /* winston */ = {
 			isa = PBXGroup;
 			children = (
+				ECCB117F2B5E19AE009881BE /* Decorators */,
 				EC7078F52ACAD93800A83240 /* Assets */,
 				EC8B814C2AC96506000DC827 /* Extensions */,
 				EC77EC092B2548460053B966 /* Navigation */,
@@ -1624,19 +1629,13 @@
 		EC593AFB2A47AEAB002D6454 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				EC8EF59D2B607BAB009E51D2 /* RedditEntities */,
 				EC1AC9B42B20084500674B31 /* Credentials */,
 				655065522B12034500C796E7 /* WinstonAPI */,
 				ECBD8E292ABBC6CF00C74E87 /* caches */,
 				652011F82AC2C45D005DD899 /* ThemeStore */,
 				ECE08B5C2AA9C93E00F84DC9 /* WinstonTheme */,
 				EC08541C2A4BFEF100E88389 /* RedditAPI */,
-				ECDBA8C22A4A820800FB42DB /* Post.swift */,
-				ECDBA8C42A4A835800FB42DB /* Subreddit.swift */,
-				EC31881B2A92BBFB00CB3738 /* Multi.swift */,
-				EC0854162A4BF45C00E88389 /* Comment.swift */,
-				EC08541A2A4BFEB300E88389 /* User.swift */,
-				EC22A31F2A5C7FB50062A112 /* Message.swift */,
-				EC5EDA742A4E937700140A08 /* GenericRedditEntity.swift */,
 				ECDD514F2A726F2600FD9498 /* DebouncedText.swift */,
 				EC50B0E32A84563C00AB8F72 /* SwipeAction.swift */,
 				ECF5B3042AC837F500355589 /* IconManager.swift */,
@@ -1727,6 +1726,7 @@
 				EC620EE52B0CD55C00206A66 /* ThemeText.swift */,
 				EC620EE72B0CD56E00206A66 /* ColorSchemes.swift */,
 				EC620EE92B0CD57C00206A66 /* ThemePadding.swift */,
+				EC8EF5A22B608F63009E51D2 /* ThemeColor.swift */,
 				EC620EEB2B0CD58700206A66 /* ThemeForegroundBG.swift */,
 				EC620EED2B0CD59700206A66 /* ThemeBG.swift */,
 				EC620EEF2B0CD5A400206A66 /* UnseenType.swift */,
@@ -1808,8 +1808,8 @@
 		EC77EC0E2B2555770053B966 /* swipers */ = {
 			isa = PBXGroup;
 			children = (
-				EC8F34652A6A348F00EB8249 /* SwipeActions.swift */,
 				EC1884472A8D7C1C00CAFB7A /* SwipeAnywhere.swift */,
+				EC8F34652A6A348F00EB8249 /* SwipeActions.swift */,
 				EC3BC5EB2ACC21AA0050CA8F /* SwipeRevolution.swift */,
 				EC5EDA702A4DA94A00140A08 /* SwipeActionsOld.swift */,
 				EC684C822AF1FD9E00BC2A84 /* ScrollSwipe_WIP.swift */,
@@ -2001,6 +2001,20 @@
 				EC8C707A2B4E4EB7004DBA75 /* ImageProcessors+ScaleFixer.swift */,
 			);
 			path = Nuke;
+			sourceTree = "<group>";
+		};
+		EC8EF59D2B607BAB009E51D2 /* RedditEntities */ = {
+			isa = PBXGroup;
+			children = (
+				ECDBA8C22A4A820800FB42DB /* Post.swift */,
+				ECDBA8C42A4A835800FB42DB /* Subreddit.swift */,
+				EC31881B2A92BBFB00CB3738 /* Multi.swift */,
+				EC0854162A4BF45C00E88389 /* Comment.swift */,
+				EC08541A2A4BFEB300E88389 /* User.swift */,
+				EC22A31F2A5C7FB50062A112 /* Message.swift */,
+				EC5EDA742A4E937700140A08 /* GenericRedditEntity.swift */,
+			);
+			path = RedditEntities;
 			sourceTree = "<group>";
 		};
 		EC8F34942A6F55C800EB8249 /* Links */ = {
@@ -2262,7 +2276,6 @@
 				ECE4497E2A6896B700E2A3B7 /* SubscribeButton.swift */,
 				6576437D2ACF20DA00805641 /* AppDetailDescription.swift */,
 				657643812ACF224500805641 /* AppDetailFullView.swift */,
-				ECD1FC062A56D46D00723016 /* ObservableArray.swift */,
 				6576437F2ACF20F100805641 /* ExpandableText.swift */,
 				EC8F349A2A6F92DC00EB8249 /* PillTab.swift */,
 				ECDD51652A74E4DD00FD9498 /* SubredditPostsContainer.swift */,
@@ -2308,7 +2321,7 @@
 				EC6081272B43B04E001A1077 /* PressableButton.swift */,
 				EC4792E12B45143000487AEE /* BetterLottieView.swift */,
 				EC49A8F02B49F7C100000EBD /* WinstonButton.swift */,
-				BBD6E9D62B50F37200901C1C /* Quirky Msg Util.swift */,
+				BBD6E9D62B50F37200901C1C /* QuirkyMsgUtil.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -2321,6 +2334,14 @@
 				ECF1478E2AB620A400572352 /* CommentSample.swift */,
 			);
 			path = modelSamples;
+			sourceTree = "<group>";
+		};
+		ECCB117F2B5E19AE009881BE /* Decorators */ = {
+			isa = PBXGroup;
+			children = (
+				ECCB11802B5E19B7009881BE /* SilentState.swift */,
+			);
+			path = Decorators;
 			sourceTree = "<group>";
 		};
 		ECD5EE8F2B11D523002CA158 /* TabBarOverlay */ = {
@@ -2490,6 +2511,7 @@
 				EC6081252B43A766001A1077 /* Lottie */,
 				ECA3700F2B480FC900C73CB0 /* WrappingHStack */,
 				BBD6E9DD2B51B03600901C1C /* MarkdownUI */,
+				ECB0D46D2B5ED1DE00F90B9B /* SwiftyUI */,
 			);
 			productName = winston;
 			productReference = EC593AD42A4673B2002D6454 /* winston.app */;
@@ -2573,6 +2595,7 @@
 				EC6081242B43A766001A1077 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 				ECA3700E2B480FC900C73CB0 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				BBD6E9DC2B51B01B00901C1C /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				ECB0D46C2B5ED1DE00F90B9B /* XCRemoteSwiftPackageReference "SwiftyUI" */,
 			);
 			productRefGroup = EC593AD52A4673B2002D6454 /* Products */;
 			projectDirPath = "";
@@ -2676,7 +2699,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/zsh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nsource ~/.zshrc\ncd \"$PROJECT_DIR\"/winston-everywhere\nnpm install\nnpm run build\n\nFOLDER_PATH=\"${PROJECT_DIR}/winston-everywhere/dist\"\n\nfind \"${FOLDER_PATH}\" -type f > \"${FOLDER_PATH}/filelist.xcfilelist\"\n";
+			shellScript = "
+";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2810,7 +2834,6 @@
 				EC7FBE2D2B411AAD0082FA44 /* CredentialsPanelEmptyView.swift in Sources */,
 				EC4792E22B45143000487AEE /* BetterLottieView.swift in Sources */,
 				657643802ACF20F100805641 /* ExpandableText.swift in Sources */,
-				ECD1FC072A56D46D00723016 /* ObservableArray.swift in Sources */,
 				ECF82A1D2B218EBE00CBF45D /* CredentialPanelItem.swift in Sources */,
 				EC8F34A12A6FC99000EB8249 /* updatePostsInBox.swift in Sources */,
 				EC4C7CA82B2C69620007A4DA /* migrateOldDefaults.swift in Sources */,
@@ -2891,7 +2914,7 @@
 				ECE4497F2A6896B700E2A3B7 /* SubscribeButton.swift in Sources */,
 				EC77EC142B25761A0053B966 /* newCredentialListener.swift in Sources */,
 				ECE08B6A2AA9F03900F84DC9 /* LinesTheme.swift in Sources */,
-				BBD6E9D72B50F37200901C1C /* Quirky Msg Util.swift in Sources */,
+				BBD6E9D72B50F37200901C1C /* QuirkyMsgUtil.swift in Sources */,
 				EC1906F52A55B88500A0300E /* nestComments.swift in Sources */,
 				EC6495A82A999C4A00B1852C /* CachedMulti+CoreDataClass.swift in Sources */,
 				EC3AC9DF2AAD19580078EC78 /* ThemeColorPicker.swift in Sources */,
@@ -3008,6 +3031,7 @@
 				EC22A3142A5B4B9C0062A112 /* ChangeAuthAPIKey.swift in Sources */,
 				EC3B32462AC64F4C002C1291 /* SubredditPostsIPAD.swift in Sources */,
 				EC2A39132AC1FF63001E5354 /* PostLinkCompact.swift in Sources */,
+				EC8EF5A32B608F63009E51D2 /* ThemeColor.swift in Sources */,
 				EC1884482A8D7C1C00CAFB7A /* SwipeAnywhere.swift in Sources */,
 				EC5A1E432B178FF800EBBE96 /* calculateDistance.swift in Sources */,
 				EC3AC9E72AAD1F7F0078EC78 /* FakeSection.swift in Sources */,
@@ -3077,6 +3101,7 @@
 				EC4C7C912B2BFA080007A4DA /* PostLinkDefSettings.swift in Sources */,
 				EC31DB182B12F0EB00A777ED /* CircleWave.metal in Sources */,
 				EC2760832B2ADFD100ADCE26 /* ConcurrentRunner.swift in Sources */,
+				ECCB11812B5E19B7009881BE /* SilentState.swift in Sources */,
 				ECE08B682AA9E62900F84DC9 /* AvatarTheme.swift in Sources */,
 				EC08541B2A4BFEB300E88389 /* User.swift in Sources */,
 				BB0D15272B0698FD00668448 /* MixedContentFeedView.swift in Sources */,
@@ -3406,7 +3431,7 @@
 				INFOPLIST_FILE = "winston-everywhere/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Winston Everywhere";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3440,7 +3465,7 @@
 				INFOPLIST_FILE = "winston-everywhere/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Winston Everywhere";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3655,6 +3680,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		ECB0D46C2B5ED1DE00F90B9B /* XCRemoteSwiftPackageReference "SwiftyUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/haoking/SwiftyUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.0;
+			};
+		};
 		ECDD515D2A748C5800FD9498 /* XCRemoteSwiftPackageReference "OpenGraph" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/satoshi-takano/OpenGraph.git";
@@ -3825,6 +3858,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = ECAA8B822A76421000D9D636 /* XCRemoteSwiftPackageReference "YouTubePlayerKit" */;
 			productName = YouTubePlayerKit;
+		};
+		ECB0D46D2B5ED1DE00F90B9B /* SwiftyUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ECB0D46C2B5ED1DE00F90B9B /* XCRemoteSwiftPackageReference "SwiftyUI" */;
+			productName = SwiftyUI;
 		};
 		ECDD515E2A748C5800FD9498 /* OpenGraph */ = {
 			isa = XCSwiftPackageProductDependency;

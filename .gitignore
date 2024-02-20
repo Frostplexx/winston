@@ -91,10 +91,6 @@ iOSInjectionProject/
 
 # Custom Gitignore
 /.DS_Store
+/PillBell/.DS_Store
+/PillBell.xcodeproj/project.xcworkspace/xcuserdata
 /xcuserdata
-
-*.DS_Store
-
-node_modules/
-
-.parcel-cache/

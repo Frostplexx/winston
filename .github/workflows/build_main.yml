@@ -52,9 +52,25 @@ jobs:
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
     
       - name: Set version number
-        run: |
-            YOUR_PROJECT_NAME="winston"
-            sed -i '' -e 's/MARKETING_VERSION \\= [^\\;]*\\;/MARKETING_VERSION = #{version_number};/' ../${YOUR_PROJECT_NAME}.xcodeproj/project.pbxproj
+        id: set-version-number
+        uses: google-github-actions/release-please-action@v4
+        with:
+            # this assumes that you have created a personal access token
+            # (PAT) and configured it as a GitHub action secret named
+            # `MY_RELEASE_PLEASE_TOKEN` (this secret name is not important).
+            token: ${{ secrets.MY_RELEASE_PLEASE_TOKEN }}
+            # this is a built-in strategy in release-please, see "Action Inputs"
+            # for more options
+            target-branch: ${{ github.ref_name }}
+            skip-github-pull-request: true
+            skip-github-release: true
+
+            echo set-output: name=version::{{ .major }} + ${{ .minor }} + ${{ .patch }}
+            # Get version with ${{ steps.set-version-number.outputs.version}} (i think)
+            # Maybe its ${{ steps.set-version-number.outputs.major}} or both??
+
+            # Problem is above probably begins with 0.0.1??? Below not needed if it continues with current.
+            # sed -i '' -e 's/MARKETING_VERSION \\= [^\\;]*\\;/MARKETING_VERSION = #{version_number};/' ../${YOUR_PROJECT_NAME}.xcodeproj/project.pbxproj
 
       - name: Build Xcode archive
         env:
@@ -84,6 +100,7 @@ jobs:
           rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
       - name: Create Github Tag
+        id: create-github-tag
         uses: google-github-actions/release-please-action@v4
         with:
             # this assumes that you have created a personal access token
@@ -93,6 +110,24 @@ jobs:
             # this is a built-in strategy in release-please, see "Action Inputs"
             # for more options
             release-type: simple
+            target-branch: ${{ github.ref_name }}
+
+      - name: tag major and minor versions
+        if: ${{ steps.create-github-tag.outputs.release_created }}
+        # If release was created, create for example 1.8.1 as tag instead of only 1.x (if i understood it right)
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git remote add gh-token "https://${{ secrets.GITHUB_TOKEN }}@github.com/google-github-actions/release-please-action.git"
+          git tag -d v${{ steps.create-github-tag.outputs.major }} || true
+          git tag -d v${{ steps.create-github-tag.outputs.major }}.${{ steps.release.outputs.minor }} || true
+          git push origin :v${{ steps.create-github-tag.outputs.major }} || true
+          git push origin :v${{ steps.create-github-tag.outputs.major }}.${{ steps.create-github-tag.outputs.minor }} || true
+          git tag -a v${{ steps.create-github-tag.outputs.major }} -m "Release v${{ steps.create-github-tag.outputs.major }}"
+          git tag -a v${{ steps.create-github-tag.outputs.major }}.${{ steps.create-github-tag.outputs.minor }} -m "Release v${{ steps.create-github-tag.outputs.major }}.${{ steps.create-github-tag.outputs.minor }}"
+          git push origin v${{ steps.create-github-tag.outputs.major }}
+          git push origin v${{ steps.create-github-tag.outputs.major }}.${{ steps.create-github-tag.outputs.minor }}
+
       
     
 
